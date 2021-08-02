@@ -1,8 +1,21 @@
 <template>
     <div>
-        <button class="btn btn-primary mb-2" data-toggle="modal" data-target="#customerModal">
-            Add Customer +
-        </button>
+        <div class="row">
+            <div class="col-auto">
+                <button class="btn btn-primary mb-2" data-toggle="modal" data-target="#customerModal">Add Customer +</button>
+            </div>
+            <div class="col-auto">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <button class="btn btn-icon btn-primary" @click="getCustomers"><i class="fa fa-search"></i></button>
+                    </div>
+                    <input type="date" class="form-control" v-model="filter_start_date">
+                    <input type="date" class="form-control" v-model="filter_end_date">
+                </div>
+            </div>
+        </div>
+
+        <pagination :data="customers" @pagination-change-page="getCustomers" :limit="5" :show-disabled="true"></pagination>
 
         <table class="table table-bordered table-striped">
             <thead>
@@ -20,7 +33,7 @@
             </thead>
             <tbody>
                 <tr v-for="(customer, i) in customers.data" :key="i">
-                    <th>{{ customers.data.length-i }}</th>
+                    <th>{{ (customers.to - customers.per_page) + i+1 }}</th>
                     <td>{{ customer.name }}</td>
                     <td>{{ customer.address }}</td>
                     <td>{{ customer.contact_1 }}</td>
@@ -30,13 +43,15 @@
                     <td>{{ $root.formattedDate(customer.created_at) }}</td>
                     <td>
                         <button class="btn btn-primary" @click="edit(customer.id)">Edit</button>
-                        <button class="btn btn-warning" @click="createMonthlyReceipt(customer.id)">+ Monthly Receipt</button>
                         <a class="btn btn-success" :href="'/customer/'+customer.id+'/receipts'">Receipts</a>
-                        <a class="btn btn-danger" :href="'/customer/'+customer.id+'/contracts'">Contracts</a>
+                        <a class="btn btn-secondary" :href="'/customer/'+customer.id+'/contracts'">Contracts</a>
+                        <button class="btn btn-block mt-2 btn-danger" @click="createMonthlyReceipt(customer.id)"><i class="fa fa-plus"></i> Monthly Receipt</button>
                     </td>
                 </tr>
             </tbody>
         </table>
+
+        <pagination :data="customers" @pagination-change-page="getCustomers" :limit="5" :show-disabled="true"></pagination>
 
         <div class="modal" id="customerModal" tabindex="-1" role="dialog" aria-labelledby="customerModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-xl" role="document">
@@ -161,35 +176,38 @@
 
 
 <script>
+    import moment from 'moment'
+    export default {
+        components: {},
+        data() {
+            return {
+                customer_contract: [],
+                customer_monthly_receipt: [],
+                is_edit: false,
+                customers: {},
+                customer: {
+                    id: '',
+                    name: '',
+                    address: '',
+                    contact_1: '',
+                    contact_2: '',
+                    free_trial: '',
+                    note: ''
+                },
 
-export default {
-    components: {},
-    data() {
-        return {
-            customer_contract: [],
-            customer_monthly_receipt: [],
-            is_edit: false,
-            customers: [],
-            customer: {
-                id: '',
-                name: '',
-                address: '',
-                contact_1: '',
-                contact_2: '',
-                free_trial: '',
-                note: ''
-            }
-        };
-    },
-    methods: {
-        createMonthlyReceipt(id) {
-            if (confirm('are you sure?')) {
-                axios.get(`/api/customer/${id}/new-monthly-receipt`).then(response => {
-                    this.customer_monthly_receipt = response.data
-                    toastr.success('successfully created')
+                filter_start_date: moment(new Date).format('YYYY-MM-DD'),
+                filter_end_date: moment(new Date).format('YYYY-MM-DD'),
+            };
+        },
+        methods: {
+            createMonthlyReceipt(id) {
+                if (confirm('are you sure?')) {
+                    axios.get(`/api/customer/${id}/new-monthly-receipt`).then(response => {
+                        this.customer_monthly_receipt = response.data
+                        toastr.success('successfully created')
 
-                    let w = window.open("", "Test", "width=600,height=600,scrollbars=1,resizable=1")
-                    w.document.write(`
+                        let w = window.open("", "Test", "width=600,height=600,scrollbars=1,resizable=1")
+                        w.document.write(`
                         <html>
                             <head></head>
                             <body>
@@ -208,81 +226,86 @@ export default {
                             </body>
                         </html>
                     `)
-                    w.document.close()
+                        w.document.close()
 
-                    setTimeout(function () {
+                        setTimeout(function () {
 
-                        w.focus()
-                        w.print()
-                    }, 100)
-                    w.onafterprint = function () {
-                        w.close()
+                            w.focus()
+                            w.print()
+                        }, 100)
+                        w.onafterprint = function () {
+                            w.close()
+                        }
+                    }).catch(e => {
+                        toastr.error(e.response.data.message)
+                    })
+                }
+            },
+
+            reset() {
+                this.customer = {
+                    name: '',
+                    address: '',
+                    contact_1: '',
+                    contact_2: '',
+                    free_trial: '',
+                    note: '',
+                    id: ''
+                }
+                this.is_edit = false
+            },
+            edit(id) {
+                this.is_edit = true
+
+                axios.get("/api/customer/" + id).then(resp => {
+                    this.customer.name = resp.data.name
+                    this.customer.address = resp.data.address
+                    this.customer.contact_1 = resp.data.contact_1
+                    this.customer.contact_2 = resp.data.contact_2
+                    this.customer.free_trial = resp.data.free_trial
+                    this.customer.note = resp.data.note
+                    this.customer.id = resp.data.id
+                })
+                $('#customerModal').modal()
+            },
+            getCustomerContracts(id) {
+                axios.get(`/api/customer/${id}/contracts`).then(resp => {
+                    this.customer_contract = resp.data
+                });
+                $("$contractsDTModal").modal()
+            },
+            edited() {
+                let _this = this
+                axios.put("/api/customer/" + this.customer.id, this.customer);
+                $('#customerModal').modal("hide")
+                this.is_edit = false
+                let index = this.customers.data.findIndex(item => item.id === _this.customer.id)
+                _this.customers.data[index] = _this.customer
+                this.reset()
+            },
+            getCustomers(page = 1) {
+                axios.get("/api/customer?page=" + page, {
+                    params: {
+                        start_date: this.filter_start_date,
+                        end_date: this.filter_end_date,
                     }
+                }).then(r => this.customers = r.data)
+            },
+            create() {
+                axios.post('/api/customer', this.customer).then(r => {
+                    this.getCustomers()
+                    $('#customerModal').modal('hide')
                 }).catch(e => {
-                    toastr.error(e.response.data.message)
+                    let errors = ''
+                    Object.keys(e.response.data.errors).forEach(el => {
+                        errors += (`<li>${e.response.data.errors[el]}</li>`)
+                    })
+                    toastr.error(`<ul>${errors}</ul>`)
                 })
             }
         },
-
-        reset() {
-            this.customer = {
-                name: '',
-                address: '',
-                contact_1: '',
-                contact_2: '',
-                free_trial: '',
-                note: '',
-                id: ''
-            }
-            this.is_edit = false
+        mounted() {
+            this.getCustomers();
         },
-        edit(id) {
-            this.is_edit = true
-
-            axios.get("/api/customer/" + id).then(resp => {
-                this.customer.name = resp.data.name
-                this.customer.address = resp.data.address
-                this.customer.contact_1 = resp.data.contact_1
-                this.customer.contact_2 = resp.data.contact_2
-                this.customer.free_trial = resp.data.free_trial
-                this.customer.note = resp.data.note
-                this.customer.id = resp.data.id
-            })
-            $('#customerModal').modal()
-        },
-        getCustomerContracts(id) {
-            axios.get(`/api/customer/${id}/contracts`).then(resp => {
-                this.customer_contract = resp.data
-            });
-            $("$contractsDTModal").modal()
-        },
-        edited() {
-            let _this = this
-            axios.put("/api/customer/" + this.customer.id, this.customer);
-            $('#customerModal').modal("hide")
-            this.is_edit = false
-            let index = this.customers.data.findIndex(item => item.id === _this.customer.id)
-            _this.customers.data[index] = _this.customer
-            this.reset()
-        },
-        getCustomers() {
-            axios.get("/api/customer").then(r => this.customers = r.data)
-        },
-        create() {
-            axios.post('/api/customer', this.customer).then(r => {
-                this.getCustomers()
-                $('#customerModal').modal('hide')
-            }).catch(e => {
-                let errors = ''
-                Object.keys(e.response.data.errors).forEach(el => {
-                    errors += (`<li>${e.response.data.errors[el]}</li>`)
-                })
-                toastr.error(`<ul>${errors}</ul>`)
-            })
-        }
-    },
-    mounted() {
-        this.getCustomers();
-    },
-};
+    };
 </script>

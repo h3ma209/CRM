@@ -13,6 +13,7 @@
                             <th>#</th>
                             <th>Invoice No.</th>
                             <th>Customer</th>
+                            <th>Total</th>
                             <th>Date</th>
                             <th>Paid at</th>
                             <th>Created at</th>
@@ -24,6 +25,7 @@
                             <th>{{ receipts.data.length-i }}</th>
                             <td>{{ receipt.invoice_id }}</td>
                             <td>{{ receipt.customer.name }}</td>
+                            <td>{{ receipt.total_details[0].total.toLocaleString() }}</td>
                             <td>{{ receipt.date }}</td>
                             <td>{{ receipt.paid_at}}</td>
                             <td>{{ $root.formattedDate(receipt.created_at) }}</td>
@@ -271,15 +273,12 @@ export default {
 
     },
     methods: {
-
         deleteRow(id) {
-            
             let dt = this.receipt.details[id]
             this.receipt.details.splice(id,1);
             
-            console.log(dt)
             if (dt.id != '') {
-                axios.delete('/api/receipt/detail/' + dt.id).then(r => console.log(r.data)).catch(e => {
+                axios.delete('/api/receipt/detail/' + dt.id).catch(e => {
                     toastr.error(e.response.data.message)
                 })
             }
@@ -376,7 +375,7 @@ export default {
             this.reset()
         },
         getReceiptNum() {
-            axios.get("/api/last_receipt_num").then(r => this.last_receipt_num = r.data + 1)
+            axios.get("/api/receipt/new-invoice-no").then(r => this.last_receipt_num = r.data + 1)
         }
 
     },

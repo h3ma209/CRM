@@ -2,22 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\LastInvoiceNumber;
 use App\Models\Receipt;
-use App\Models\ReceiptDetail;
 use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
+use App\Models\ReceiptDetail;
+use App\Models\LastInvoiceNumber;
+use Illuminate\Support\Facades\DB;
 
 class ReceiptController extends Controller
 {
     public function index()
     {
-        return Receipt::with('customer')->latest()->paginate(20);
+        return Receipt::with('customer', 'details', 'totalDetails')->latest()->paginate(20);
     }
 
     public function show($id)
     {
-        return Receipt::with('customer', 'details')->whereId($id)->get();
+        return Receipt::with('customer', 'details')->whereId($id)->first();
     }
 
     public function store(Request $request)
@@ -27,7 +28,7 @@ class ReceiptController extends Controller
                 'id' => 1,
             ],
             [
-                "last_invoice_no" => '10000'
+                "last_invoice_no" => '10000',
             ]
         );
         $invoiceid = $invoiceid->last_invoice_no + 1;
@@ -62,7 +63,7 @@ class ReceiptController extends Controller
     {
         // dd($request->all());
         $receipt = Receipt::updateOrCreate([
-            "id" => $request->id
+            "id" => $request->id,
         ], [
             "customer_id" => $request->customer_id,
             "date" => $request->date,
@@ -71,7 +72,7 @@ class ReceiptController extends Controller
         foreach ($request->details as $detail) {
             ReceiptDetail::updateOrCreate([
                 "id" => $detail['id'],
-                "receipt_id" => $detail['receipt_id']
+                "receipt_id" => $detail['receipt_id'],
             ], [
                 "receipt_id" => $receipt->id,
                 "name" => $detail["name"],
@@ -81,5 +82,15 @@ class ReceiptController extends Controller
             ]);
         }
         return $receipt;
+    }
+
+    public function newInvoiceNumber()
+    {
+        $lastInvoiceNo = LastInvoiceNumber::firstOrCreate(
+            ['id' => 1],
+            ['last_invoice_no' => 10000]
+        );
+
+        return $lastInvoiceNo->last_invoice_no + 1;
     }
 }

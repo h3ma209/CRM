@@ -7,6 +7,7 @@ use App\Models\Contract;
 use App\Models\Customer;
 use Illuminate\Http\Request;
 use App\Models\LastInvoiceNumber;
+use Illuminate\Support\Facades\DB;
 
 class CustomerController extends Controller
 {
@@ -15,9 +16,16 @@ class CustomerController extends Controller
         return Customer::select('id', 'name')->get();
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        return Customer::latest()->paginate(20);
+        $start_date = $request->start_date;
+        $end_date = $request->end_date ?? $start_date;
+
+        $customers = Customer::when($start_date, function($q) use($start_date, $end_date) {
+            $q->whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date]);
+        })->latest();
+
+        return $customers->paginate(20);
     }
 
     public function store(Request $request)
@@ -28,8 +36,8 @@ class CustomerController extends Controller
             'user_id' => 'required',
             'name' => 'required|string',
             'address' => 'nullable|string',
-            'contact_1' => 'nullable|integer',
-            'contact_2' => 'nullable|integer',
+            'contact_1' => 'nullable|numeric',
+            'contact_2' => 'nullable|numeric',
             'free_trial' => 'nullable|string',
             'note' => 'nullable|string',
         ]);

@@ -18,8 +18,8 @@ class CreateCustomersTable extends Migration
             $table->unsignedBigInteger("user_id");
             $table->string("name");
             $table->text("address")->nullable();
-            $table->integer("contact_1")->nullable();
-            $table->integer("contact_2")->nullable();
+            $table->string("contact_1")->nullable();
+            $table->string("contact_2")->nullable();
             $table->string("free_trial")->nullable();
             $table->text("note")->nullable();
             $table->softDeletes();

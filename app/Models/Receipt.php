@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Receipt extends Model
 {
@@ -20,5 +21,10 @@ class Receipt extends Model
     public function details()
     {
         return $this->hasMany(ReceiptDetail::class);
+    }
+
+    public function totalDetails()
+    {
+        return $this->hasMany(ReceiptDetail::class)->select(DB::raw('SUM(quantity * price) AS total'), 'receipt_id')->groupBy('receipt_id');
     }
 }

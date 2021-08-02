@@ -60,6 +60,10 @@ Vue.component('Navbar', require("./components/Navbar.vue").default);
  * the page. Then, you may begin adding components to this application
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
+Vue.component('pagination', require('laravel-vue-pagination'));
+
+import helpers from './helpers.js'
+Vue.mixin(helpers)
 
 const app = new Vue({
     el: '#app',
@@ -70,6 +74,3 @@ const app = new Vue({
         }
     },
 });
-
-window.app = app;
-global.app = app;

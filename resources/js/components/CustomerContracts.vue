@@ -186,16 +186,10 @@ export default {
         getCustomers() {
             axios.get('/api/customer-list').then(r => this.customers = r.data)
         },
-        test(){
-            console.log(this.$route.params.id)
-        }
-        
-
     },
     mounted() {
         this.getContracts()
         this.getCustomers()
-        this.test()
     },
 };
 </script>
