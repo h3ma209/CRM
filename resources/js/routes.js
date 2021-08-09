@@ -12,7 +12,7 @@ export default [
         component: require('./components/Customers').default
     },
     {
-        path: '/customers',
+        path: '/',
         component: require('./components/Customers').default
     },
     {

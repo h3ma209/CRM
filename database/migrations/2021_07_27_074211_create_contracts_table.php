@@ -22,6 +22,9 @@ class CreateContractsTable extends Migration
             $table->double('prepayment')->nullable();
             $table->double('monthly_payment')->nullable();
             $table->integer('user_quantity')->default(1);
+            $table->string('free_trial_duration')->nullable();
+            $table->string("monthly_payment_currency")->default("IQD");
+            $table->string("prepayment_currency")->default("IQD");
             $table->text('note')->nullable();
             $table->softDeletes();
             $table->timestamps();

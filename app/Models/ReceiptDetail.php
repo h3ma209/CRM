@@ -11,7 +11,7 @@ class ReceiptDetail extends Model
 {
     use HasFactory, SoftDeletes;
     
-    protected $fillable = ['receipt_id', 'name', 'price', 'quantity', 'note'];
+    protected $fillable = ['receipt_id', 'name', 'price', 'quantity', 'currency','note'];
 
     public function receipt()
     {

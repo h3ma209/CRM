@@ -78,10 +78,25 @@ class ReceiptController extends Controller
                 "name" => $detail["name"],
                 "price" => $detail["price"],
                 "quantity" => $detail["quantity"],
+                "currency" => $detail["currency"],
                 "note" => $detail["note"],
             ]);
         }
         return $receipt;
+    }
+    public function destroy($id)
+    {
+        $receipt = Receipt::find($id);
+        if ($receipt) {
+            if ($receipt->details()->delete()) {
+                return $receipt->delete();
+            }
+            else{
+                return $receipt->delete();
+            }
+        } else {
+            return response(["message" => "Receipt id doesn't exist"], 500);
+        }
     }
 
     public function newInvoiceNumber()

@@ -16,17 +16,20 @@ class ContractController extends Controller
     {
         $request->merge(['user_id' => auth()->user()->id]);
 
+        
         $validated_contract = $request->validate([
             'user_id' => 'required|integer',
             'customer_id' => 'required|integer',
             'start_date' => 'required|date',
             'expire_date' => 'nullable|date',
             'prepayment' => 'nullable|numeric',
+            'prepayment_currency' => 'nullable|string',
             'monthly_payment' => 'nullable|numeric',
+            'monthly_payment_currency' => 'nullable|string',
             'user_quantity' => 'required|integer',
             'note' => 'nullable|string',
         ]);
-
+        
         $contract = Contract::create($validated_contract);
 
         return $contract;
@@ -46,7 +49,9 @@ class ContractController extends Controller
             'start_date' => 'required|date',
             'expire_date' => 'nullable|date',
             'prepayment' => 'nullable|numeric',
+            'prepayment_currency' => 'nullable|string',
             'monthly_payment' => 'nullable|numeric',
+            'monthly_payment_currency' => 'nullable|string',
             'user_quantity' => 'required|integer',
             'note' => 'nullable|string',
         ]);

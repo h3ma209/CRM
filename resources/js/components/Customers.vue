@@ -25,7 +25,7 @@
                     <th>Address</th>
                     <th>Contanct 1</th>
                     <th>Contanct 2</th>
-                    <th>Free Trial</th>
+                    <th>Email</th>
                     <th>Note</th>
                     <th>Created at</th>
                     <th>Actions</th>
@@ -38,7 +38,7 @@
                     <td>{{ customer.address }}</td>
                     <td>{{ customer.contact_1 }}</td>
                     <td>{{ customer.contact_2 }}</td>
-                    <td>{{ customer.free_trial }}</td>
+                    <td>{{ customer.email }}</td>
                     <td>{{ customer.note }}</td>
                     <td>{{ $root.formattedDate(customer.created_at) }}</td>
                     <td>
@@ -57,7 +57,7 @@
             <div class="modal-dialog modal-xl" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Modal title</h5>
+                        <h5 class="modal-title">Customer</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -88,8 +88,8 @@
                             </div>
                             <div class="col-sm-6">
                                 <div class="form-group">
-                                    <label for="">Free Trial</label>
-                                    <input type="text" class="form-control" v-model="customer.free_trial">
+                                    <label for="">Email</label>
+                                    <input type="email" class="form-control" v-model="customer.email">
                                 </div>
                                 <div class="form-group">
                                     <label for="">Note</label>
@@ -118,7 +118,7 @@
             <div class="modal-dialog modal-xl" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Modal title</h5>
+                        <h5 class="modal-title">Contract</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -143,7 +143,7 @@
                                 <tbody>
 
                                     <tr v-for="(contract, i) in customer_contract.data" :key="i">
-                                        <th>{{ contracts.data.length-i }}</th>
+                                        <th>{{ contracts.data.length - i }}</th>
                                         <td>{{ contract.customer.name }}</td>
                                         <td>{{ contract.start_date }}</td>
                                         <td>{{ contract.expire_date }}</td>
@@ -191,7 +191,7 @@
                     address: '',
                     contact_1: '',
                     contact_2: '',
-                    free_trial: '',
+                    email: '',
                     note: ''
                 },
 
@@ -248,7 +248,7 @@
                     address: '',
                     contact_1: '',
                     contact_2: '',
-                    free_trial: '',
+                    email: '',
                     note: '',
                     id: ''
                 }
@@ -262,7 +262,7 @@
                     this.customer.address = resp.data.address
                     this.customer.contact_1 = resp.data.contact_1
                     this.customer.contact_2 = resp.data.contact_2
-                    this.customer.free_trial = resp.data.free_trial
+                    this.customer.email = resp.data.email
                     this.customer.note = resp.data.note
                     this.customer.id = resp.data.id
                 })

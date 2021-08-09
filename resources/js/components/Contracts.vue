@@ -24,10 +24,19 @@
                     <td>{{ contract.customer.name }}</td>
                     <td>{{ contract.start_date }}</td>
                     <td>{{ contract.expire_date }}</td>
-                    <td>{{ contract.prepayment }}</td>
-                    <td>{{ contract.monthly_payment }}</td>
+                    <td>
+                        {{ contract.prepayment }}
+                        <span v-if="contract.prepayment_currency == 'IQD'" class="badge badge-success">{{ contract.prepayment_currency  }}</span>
+                        <span v-if="contract.prepayment_currency == 'USD'" class="badge badge-primary">{{ contract.prepayment_currency  }}</span>
+                    </td>
+                    <td>
+                        {{ contract.monthly_payment}}
+                        <span v-if="contract.monthly_payment_currency == 'IQD'" class="badge badge-success">{{ contract.monthly_payment_currency  }}</span>
+                        <span v-if="contract.monthly_payment_currency == 'USD'" class="badge badge-primary">{{ contract.monthly_payment_currency  }}</span>
+                    </td>
                     <td>{{ contract.user_quantity }}</td>
                     <td>{{ contract.note }}</td>
+                    <td>{{ contract.free_trial_durtaion }}</td>
                     <td>{{ $root.formattedDate(contract.created_at) }}</td>
                     <td>
                         <button class="btn btn-primary" @click="edit(contract.id)">Edit</button>
@@ -42,7 +51,7 @@
             <div class="modal-dialog modal-xl" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Modal title</h5>
+                        <h5 class="modal-title">Contract</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -75,9 +84,26 @@
                                             <label for="">Prepayment</label>
                                             <input type="number" class="form-control" v-model="contract.prepayment">
                                         </div>
+                                        <div class="col-sm-4">
+                                            <label for="">Currency</label>
+                                            <select v-model="contract.prepayment_currency" class="form-control">
+                                                <option value="" disabled>Select Currency</option>
+                                                <option v-for="currency,i in currencies" :key="i" :value="currency">{{ currency }}</option>
+                                            </select>
+                                        </div>
+
+                                    </div>
+                                    <div class="row mt-2">
                                         <div class="col-sm-6">
                                             <label for="">Monthly Payment</label>
                                             <input type="number" class="form-control" v-model="contract.monthly_payment">
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <label for="">Currency</label>
+                                            <select v-model="contract.monthly_payment_currency" class="form-control">
+                                                <option value="" disabled>Select Currency</option>
+                                                <option v-for="currency,i in currencies" :key="i" :value="currency">{{ currency }}</option>
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
@@ -86,6 +112,10 @@
                                 <div class="form-group">
                                     <label for="">User Quantity</label>
                                     <input type="number" class="form-control" v-model="contract.user_quantity" min='1'>
+                                </div>
+                                <div class="form-group">
+                                    <label for="">Free Trial Durtation</label>
+                                    <input type="text" class="form-control" v-model="contract.free_trial_duration">
                                 </div>
                                 <div class="form-group">
                                     <label for="">Note</label>
@@ -109,74 +139,80 @@
 
 
 <script>
-    export default {
-        components: {},
-        data() {
-            return {
-                contracts: [],
-                is_edit: false,
-                contract: {
-                    id: '',
-                    customer_id: '',
-                    start_date: moment(new Date).format("YYYY-MM-DD"),
-                    expire_date: '',
-                    prepayment: '',
-                    monthly_payment: '',
-                    user_quantity: 1,
-                    note: '',
-                },
-                customers: [],
-            };
+export default {
+    components: {},
+    data() {
+        return {
+            contracts: [],
+            currencies: ["IQD", "USD"],
+            is_edit: false,
+            contract: {
+                id: '',
+                customer_id: '',
+                start_date: moment(new Date).format("YYYY-MM-DD"),
+                expire_date: '',
+                prepayment: '',
+                monthly_payment: '',
+                user_quantity: 1,
+                free_trial_duration: '',
+                prepayment_currency: '',
+                monthly_payment_currency: '',
+                note: '',
+            },
+            customers: [],
+        };
+    },
+    methods: {
+        getContracts() {
+            axios.get("/api/contract").then(r => this.contracts = r.data)
         },
-        methods: {
-            getContracts() {
-                axios.get("/api/contract").then(r => this.contracts = r.data)
-            },
 
-            create() {
-                axios.post('/api/contract', this.contract).then(r => {
-                    this.getContracts()
-                    $('#contractModal').modal('hide')
-                })
-            },
-            edit(id) {
-                this.is_edit = true
+        create() {
+            axios.post('/api/contract', this.contract).then(r => {
+                this.getContracts()
+                $('#contractModal').modal('hide')
+            })
+        },
+        edit(id) {
+            this.is_edit = true
 
-                axios.get("/api/contract/" + id).then(resp => {
-                    this.contract = resp.data
-                })
+            axios.get("/api/contract/" + id).then(resp => {
+                this.contract = resp.data
+            })
 
-                $('#contractModal').modal()
-            },
-            update() {
-                axios.put("/api/contract/" + this.contract.id, this.contract).then(resp => {
-                    this.contracts = resp.data
-                })
+            $('#contractModal').modal()
+        },
+        update() {
+            axios.put("/api/contract/" + this.contract.id, this.contract).then(resp => {
+                this.contracts = resp.data
+            })
+            $('#contractModal').modal("hide")
+            this.is_edit = false
+            this.getContracts()
 
-                $('#contractModal').modal("hide")
 
-                this.is_edit = false
-            },
-            reset() {
-                this.contract = {
-                    customer_id: '',
-                    start_date: '',
-                    expire_date: '',
-                    prepayment: '',
-                    monthly_payment: '',
-                    user_quantity: 1,
-                    note: '',
-                }
-            },
-
-            // Customers
-            getCustomers() {
-                axios.get('/api/customer-list').then(r => this.customers = r.data)
+        },
+        reset() {
+            this.contract = {
+                customer_id: '',
+                start_date: '',
+                expire_date: '',
+                prepayment: '',
+                monthly_payment: '',
+                user_quantity: 1,
+                free_trial_duration: '',
+                note: '',
             }
         },
-        mounted() {
-            this.getContracts()
-            this.getCustomers()
-        },
-    };
+
+        // Customers
+        getCustomers() {
+            axios.get('/api/customer-list').then(r => this.customers = r.data)
+        }
+    },
+    mounted() {
+        this.getContracts()
+        this.getCustomers()
+    },
+};
 </script>

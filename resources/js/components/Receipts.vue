@@ -13,7 +13,6 @@
                             <th>#</th>
                             <th>Invoice No.</th>
                             <th>Customer</th>
-                            <th>Total</th>
                             <th>Date</th>
                             <th>Paid at</th>
                             <th>Created at</th>
@@ -25,14 +24,14 @@
                             <th>{{ receipts.data.length-i }}</th>
                             <td>{{ receipt.invoice_id }}</td>
                             <td>{{ receipt.customer.name }}</td>
-                            <td>{{ receipt.total_details[0].total.toLocaleString() }}</td>
                             <td>{{ receipt.date }}</td>
                             <td>{{ receipt.paid_at}}</td>
                             <td>{{ $root.formattedDate(receipt.created_at) }}</td>
                             <td>
                                 <button class="btn btn-primary" @click="edit(receipt.id)">Edit</button>
                                 <button class="btn btn-success" @click="show(receipt.id)">Show</button>
-                                <button class="btn btn-danger" @click="print(receipt.id)">Print</button>
+                                <button class="btn btn-warning" @click="print(receipt.id)">Print</button>
+                                <button class="btn btn-danger" @click="deleteReceipt(receipt.id)">Delete</button>
                             </td>
                         </tr>
                     </tbody>
@@ -85,6 +84,7 @@
                                                 <th>Quantity</th>
                                                 <th>Price</th>
                                                 <th>Total</th>
+                                                <th>Currency</th>
                                                 <th>Note</th>
                                                 <th></th>
                                             </tr>
@@ -108,11 +108,16 @@
                                                 </td>
                                                 <td>{{ detail.quantity * detail.price }}</td>
                                                 <td>
+                                                    <select v-model="detail.currency" class="form-control">
+                                                        <option value="" disabled>Select Currency</option>
+                                                        <option v-for="currency,i in currencies" :key="i" :value="currency">{{ currency }}</option>
+                                                    </select>
+                                                </td>
+                                                <td>
                                                     <div class="form-group">
                                                         <textarea class="form-control" rows="1" v-model="detail.note"></textarea>
                                                     </div>
                                                 </td>
-
                                                 <td>
                                                     <button class="btn btn-danger" @click="deleteRow(i)">Delete</button>
                                                 </td>
@@ -256,6 +261,7 @@ export default {
                 create: true,
             },
             receipts: [],
+            currencies: ["IQD", "USD"],
 
             receipt: {
                 id: '',
@@ -265,6 +271,7 @@ export default {
                     'name': '',
                     'price': '',
                     'quantity': 1,
+                    'currency': 'IQD',
                     'note': ''
                 }]
             },
@@ -273,12 +280,15 @@ export default {
 
     },
     methods: {
+
         deleteRow(id) {
+
             let dt = this.receipt.details[id]
-            this.receipt.details.splice(id,1);
-            
+            this.receipt.details.splice(id, 1);
+
+            console.log(dt)
             if (dt.id != '') {
-                axios.delete('/api/receipt/detail/' + dt.id).catch(e => {
+                axios.delete('/api/receipt/detail/' + dt.id).then(r => console.log(r.data)).catch(e => {
                     toastr.error(e.response.data.message)
                 })
             }
@@ -305,10 +315,10 @@ export default {
             this.is_edit = false
 
             axios.get("/api/receipt/" + id).then(resp => {
-                this.receipt.customer_id = resp.data[0].customer_id
-                this.receipt.date = resp.data[0].date
-                this.receipt.details = resp.data[0].details
-                this.last_receipt_num = resp.data[0].invoice_id
+                this.receipt.customer_id = resp.data.customer_id
+                this.receipt.date = resp.data.date
+                this.receipt.details = resp.data.details
+                this.last_receipt_num = resp.data.invoice_id
                 $("#printModal").modal()
             })
 
@@ -317,11 +327,11 @@ export default {
             this.is_edit = true
 
             axios.get("/api/receipt/" + id).then(resp => {
-                this.receipt.customer_id = resp.data[0].customer_id
-                this.receipt.date = resp.data[0].date
-                this.receipt.details = resp.data[0].details
+                this.receipt.customer_id = resp.data.customer_id
+                this.receipt.date = resp.data.date
+                this.receipt.details = resp.data.details
                 this.receipt.id = id
-                this.last_receipt_num = resp.data[0].invoice_id
+                this.last_receipt_num = resp.data.invoice_id
                 this.actions.edit = true;
                 this.actions.create = false;
 
@@ -330,12 +340,26 @@ export default {
         },
 
         edited() {
-            axios.put("/api/receipt/" + this.receipt.id, this.receipt).then((resp) => console.log(resp.data))
+            axios.put("/api/receipt/" + this.receipt.id, this.receipt).then((resp) => {
+                console.log(resp.data)
+                $('#receiptModal').modal('hide');
+                this.getReceiptNum();
+            })
+
         },
 
 
         getReceipts() {
             axios.get('/api/receipt').then(r => this.receipts = r.data);
+        },
+        deleteReceipt(id) {
+            axios.delete('/api/receipt/' + id).then(r => {
+                toastr.success(`Receipt ${id} successfull deleted`)
+                this.getReceipts()
+
+            }).catch(e => {
+                toastr.error(e.message)
+            })
         },
         getCustomers() {
             axios.get('/api/customer-list').then(r => this.customers = r.data)
@@ -347,6 +371,7 @@ export default {
                 'name': '',
                 'price': '',
                 'quantity': 1,
+                "currency": "IQD",
                 'note': ''
             });
         },
@@ -358,6 +383,7 @@ export default {
                     'name': '',
                     'price': '',
                     'quantity': 1,
+                    'currency': "IQD",
                     'note': ''
                 }]
             }
@@ -368,6 +394,7 @@ export default {
                 this.getReceipts()
                 $('#receiptModal').modal('hide')
             })
+            this.getReceiptNum()
         },
         showCreateModal() {
             this.is_edit = false
@@ -375,14 +402,13 @@ export default {
             this.reset()
         },
         getReceiptNum() {
-            axios.get("/api/receipt/new-invoice-no").then(r => this.last_receipt_num = r.data + 1)
+            axios.get("/api/receipt/new-invoice-no").then(r => this.last_receipt_num = r.data)
         }
 
     },
     created() {
         this.getCustomers()
         this.getReceipts()
-
         this.getReceiptNum()
     },
     watch: {
@@ -399,7 +425,6 @@ export default {
                 return this.customers.find(item => item.id === this.receipt.customer_id).name
 
             }
-
         },
     }
 }

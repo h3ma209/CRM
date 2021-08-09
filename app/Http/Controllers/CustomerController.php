@@ -36,9 +36,9 @@ class CustomerController extends Controller
             'user_id' => 'required',
             'name' => 'required|string',
             'address' => 'nullable|string',
-            'contact_1' => 'nullable|numeric',
-            'contact_2' => 'nullable|numeric',
-            'free_trial' => 'nullable|string',
+            'contact_1' => 'nullable|string',
+            'contact_2' => 'nullable|string',
+            'email' => 'nullable|string',
             'note' => 'nullable|string',
         ]);
 
@@ -58,9 +58,9 @@ class CustomerController extends Controller
         $validated_customer = $request->validate([
             'name' => 'required|string',
             'address' => 'nullable|string',
-            'contact_1' => 'nullable|integer',
-            'contact_2' => 'nullable|integer',
-            'free_trial' => 'nullable|string',
+            'contact_1' => 'nullable|string',
+            'contact_2' => 'nullable|string',
+            'email' => 'nullable|string',
             'note' => 'nullable|string',
         ]);
 
@@ -113,6 +113,7 @@ class CustomerController extends Controller
                 'name' => 'Monthly Payment',
                 'price' => $contract->monthly_payment,
                 'quantity' => $contract->user_quantity,
+                "currency"=> $contract->monthly_payment_currency
             ]);
 
             // Update last invoice number
