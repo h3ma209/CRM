@@ -3,7 +3,9 @@
     <div>
         <template>
             <div>
-                <a class="btn btn-light  mb-2" href="/customers">BACK</a>
+                <a class="btn btn-light  mb-2" href="/customers">
+                    <span><i class="fas fa-long-arrow-alt-left"></i> Back</span>
+                </a>
                 <button class="btn btn-primary mb-2" @click="showCreateModal">
                     Add receipt +
                 </button>

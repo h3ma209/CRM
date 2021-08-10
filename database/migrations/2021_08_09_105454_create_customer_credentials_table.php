@@ -15,10 +15,10 @@ class CreateCustomerCredentialsTable extends Migration
     {
         Schema::create('customer_credentials', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger("user_id");
             $table->unsignedBigInteger("contract_id");
             $table->string('username');
             $table->string("password");
+            $table->text('note')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });

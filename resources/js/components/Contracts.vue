@@ -123,6 +123,47 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="row ">
+                            <div class="col mt-2">
+                                <table class="table table-bordered table-stripped">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Username</th>
+                                            <th>Password</th>
+                                            <th>Note</th>
+
+                                        </tr>
+                                    </thead>
+                                    <tbody id='tbody'>
+                                        <tr v-for="(user,i) in credentials" :key="i">
+                                            <td>
+                                                {{i+1}}
+                                            </td>
+                                            <td>
+                                                <div class="form-group">
+                                                    <input class="form-control" type="text" v-model="user.username" required>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="form-group">
+                                                    <input class="form-control" type="text" v-model="user.password" required>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="form-group">
+                                                    <input type="text" class="form-control" v-model="user.note" required>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-danger" @click="deleteCred(i)">Delete</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-primary" v-if="!is_edit" @click="create">Create</button>
@@ -146,6 +187,12 @@ export default {
             contracts: [],
             currencies: ["IQD", "USD"],
             is_edit: false,
+            credentials: [{
+                id: '',
+                username: '',
+                password: '',
+                note: '',
+            }],
             contract: {
                 id: '',
                 customer_id: '',
@@ -163,11 +210,16 @@ export default {
         };
     },
     methods: {
+        deleteCred(index) {
+            console.log(this.credentials[index])
+            this.credentials.splice(index, 1)
+        },
         getContracts() {
             axios.get("/api/contract").then(r => this.contracts = r.data)
         },
 
         create() {
+            this.contract.credentials = this.credentials
             axios.post('/api/contract', this.contract).then(r => {
                 this.getContracts()
                 $('#contractModal').modal('hide')
@@ -178,6 +230,7 @@ export default {
 
             axios.get("/api/contract/" + id).then(resp => {
                 this.contract = resp.data
+                this.credentials = this.contract.credentials
             })
 
             $('#contractModal').modal()
@@ -194,25 +247,50 @@ export default {
         },
         reset() {
             this.contract = {
+                id: '',
                 customer_id: '',
-                start_date: '',
+                start_date: moment(new Date).format("YYYY-MM-DD"),
                 expire_date: '',
                 prepayment: '',
                 monthly_payment: '',
                 user_quantity: 1,
+
                 free_trial_duration: '',
+                prepayment_currency: '',
+                monthly_payment_currency: '',
                 note: '',
             }
+            this.credentials = []
+
         },
 
         // Customers
         getCustomers() {
             axios.get('/api/customer-list').then(r => this.customers = r.data)
-        }
+        },
+
+
     },
     mounted() {
         this.getContracts()
         this.getCustomers()
     },
+    watch: {
+        contract: {
+            handler(val) {
+                if (val.credentials) {
+                    this.credentials = val.credentials
+                }
+                else {
+                    let l = []
+                    for (var i = 0; i < val.user_quantity; i++) {
+                        l.push({})
+                    }
+                    this.credentials = l
+                }
+            },
+            deep: true,
+        }
+    }
 };
 </script>

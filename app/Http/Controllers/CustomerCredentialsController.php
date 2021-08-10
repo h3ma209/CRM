@@ -78,8 +78,12 @@ class CustomerCredentialsController extends Controller
      * @param  \App\Models\CustomerCredentials  $customerCredentials
      * @return \Illuminate\Http\Response
      */
-    public function destroy(CustomerCredentials $customerCredentials)
+    public function destroy($id)
     {
-        //
+        $cred = CustomerCredentials::find($id);
+        if($cred){
+            $cred->delete();
+        }
+
     }
 }

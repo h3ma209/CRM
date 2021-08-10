@@ -1,7 +1,7 @@
 <template>
     <div>
         <a class="btn btn-light  mb-2" href="/contracts">
-            <- Back
+            <span><i class="fas fa-long-arrow-alt-left"></i> Back</span>
         </a>
         <button class="btn btn-primary mb-2" data-toggle="modal" data-target="#contractModal">
             Add Contract +
