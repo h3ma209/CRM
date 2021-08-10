@@ -29,15 +29,26 @@
                     <td>{{ contract.customer.name }}</td>
                     <td>{{ contract.start_date }}</td>
                     <td>{{ contract.expire_date }}</td>
-                    <td>{{ contract.prepayment }}</td>
-                    <td>{{ contract.monthly_payment }}</td>
+                    <td>
+                        {{ contract.prepayment }}
+                        <span v-if="contract.prepayment_currency == 'IQD'" class="badge badge-success">{{ contract.prepayment_currency  }}</span>
+                        <span v-if="contract.prepayment_currency == 'USD'" class="badge badge-primary">{{ contract.prepayment_currency  }}</span>
+                    </td>
+                    <td>
+                        {{ contract.monthly_payment}}
+                        <span v-if="contract.monthly_payment_currency == 'IQD'" class="badge badge-success">{{ contract.monthly_payment_currency  }}</span>
+                        <span v-if="contract.monthly_payment_currency == 'USD'" class="badge badge-primary">{{ contract.monthly_payment_currency  }}</span>
+                    </td>
                     <td>{{ contract.user_quantity }}</td>
                     <td>{{ contract.note }}</td>
+                    <td>{{ contract.free_trial_durtaion }}</td>
                     <td>{{ $root.formattedDate(contract.created_at) }}</td>
                     <td>
                         <button class="btn btn-primary" @click="edit(contract.id)">Edit</button>
                         <a class="btn btn-success" :href="'/customer/'+contract.customer_id+'/receipts'">Receipts</a>
-                        <a class="btn btn-danger" :href="'/customer/'+contract.customer_id+'/contracts'">Contracts</a>
+                        <a class="btn btn-warning" :href="'/customer/'+contract.customer_id+'/contracts'">Contracts</a>
+                        <button class="btn btn-danger" @click="deleteContract(contract.id)">Delete</button>
+
                     </td>
                 </tr>
             </tbody>
@@ -47,7 +58,7 @@
             <div class="modal-dialog modal-xl" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Modal title</h5>
+                        <h5 class="modal-title">Contract</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -80,9 +91,26 @@
                                             <label for="">Prepayment</label>
                                             <input type="number" class="form-control" v-model="contract.prepayment">
                                         </div>
+                                        <div class="col-sm-4">
+                                            <label for="">Currency</label>
+                                            <select v-model="contract.prepayment_currency" class="form-control">
+                                                <option value="" disabled>Select Currency</option>
+                                                <option v-for="currency,i in currencies" :key="i" :value="currency">{{ currency }}</option>
+                                            </select>
+                                        </div>
+
+                                    </div>
+                                    <div class="row mt-2">
                                         <div class="col-sm-6">
                                             <label for="">Monthly Payment</label>
                                             <input type="number" class="form-control" v-model="contract.monthly_payment">
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <label for="">Currency</label>
+                                            <select v-model="contract.monthly_payment_currency" class="form-control">
+                                                <option value="" disabled>Select Currency</option>
+                                                <option v-for="currency,i in currencies" :key="i" :value="currency">{{ currency }}</option>
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
@@ -93,15 +121,59 @@
                                     <input type="number" class="form-control" v-model="contract.user_quantity" min='1'>
                                 </div>
                                 <div class="form-group">
+                                    <label for="">Free Trial Durtation</label>
+                                    <input type="text" class="form-control" v-model="contract.free_trial_duration">
+                                </div>
+                                <div class="form-group">
                                     <label for="">Note</label>
                                     <textarea class="form-control" v-model="contract.note"></textarea>
                                 </div>
                             </div>
                         </div>
+                        <div class="row ">
+                            <div class="col mt-2">
+                                <table class="table table-bordered table-stripped">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Username</th>
+                                            <th>Password</th>
+                                            <th>Note</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id='tbody'>
+                                        <tr v-for="(user,i) in credentials" :key="i">
+                                            <td>
+                                                {{i+1}}
+                                            </td>
+                                            <td>
+                                                <div class="form-group">
+                                                    <input class="form-control" type="text" v-model="user.username" required>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="form-group">
+                                                    <input class="form-control" type="text" v-model="user.password" required>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="form-group">
+                                                    <input type="text" class="form-control" v-model="user.note" required>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-danger" @click="deleteCred(i)">Delete</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-primary" v-if="!is_edit" @click="create">Create</button>
-                        <button type="button" class="btn btn-primary" v-if="is_edit" @click="edited">Edit</button>
+                        <button type="button" class="btn btn-primary" v-if="is_edit" @click="update">Edit</button>
                         <button type="button" class="btn btn-secondary" data-dismiss="modal" @click="reset">
                             Close
                         </button>
@@ -109,6 +181,7 @@
                 </div>
             </div>
         </div>
+
     </div>
 </template>
 
@@ -119,27 +192,60 @@ export default {
     data() {
         return {
             contracts: [],
+            currencies: ["IQD", "USD"],
             is_edit: false,
+            credentials: [{
+                id: '',
+                username: '',
+                password: '',
+                note: '',
+            }],
             contract: {
                 id: '',
-                customer_id: '',
+                customer_id: this.$route.params.id,
                 start_date: moment(new Date).format("YYYY-MM-DD"),
                 expire_date: '',
                 prepayment: '',
                 monthly_payment: '',
                 user_quantity: 1,
+                free_trial_duration: '',
+                prepayment_currency: '',
+                monthly_payment_currency: '',
                 note: '',
             },
             customers: [],
         };
     },
     methods: {
+        deleteCred(index) {
+            console.log(this.credentials[index])
+            this.credentials.splice(index, 1)
+        },
+        deleteContract(id) {
+            axios.delete(`/api/contract/${id}`).then(() => {
+                toastr.success("Contract Successfully Deleted")
+                this.getContracts()
+            }).catch(e => toastr.error(e.message))
+        },
+        update() {
+            axios.put("/api/contract/" + this.contract.id, this.contract).then(resp => {
+                this.contracts = resp.data
+            }).catch(e => {
+                toastr.error(e.message)
+            })
+            $('#contractModal').modal("hide")
+            this.is_edit = false
+            this.getContracts()
 
+
+        },
         edit(id) {
             this.is_edit = true
 
             axios.get("/api/contract/" + id).then(resp => {
                 this.contract = resp.data
+            }).catch(e => {
+                toastr.error(e.message)
             })
             $('#contractModal').modal()
 
@@ -176,9 +282,12 @@ export default {
             axios.get(`/api/customer/${this.$route.params.id}/contracts`).then(r => this.contracts = r.data)
         },
         create() {
+            this.contract.credentials = this.credentials
             axios.post('/api/contract', this.contract).then(r => {
                 this.getContracts()
                 $('#contractModal').modal('hide')
+            }).catch(e => {
+                toastr.error(e.message)
             })
         },
 

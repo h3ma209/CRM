@@ -41,7 +41,8 @@
                     <td>
                         <button class="btn btn-primary" @click="edit(contract.id)">Edit</button>
                         <a class="btn btn-success" :href="'/customer/'+contract.customer_id+'/receipts'">Receipts</a>
-                        <a class="btn btn-danger" :href="'/customer/'+contract.customer_id+'/contracts'">Contracts</a>
+                        <a class="btn btn-warning" :href="'/customer/'+contract.customer_id+'/contracts'">Contracts</a>
+                        <button class="btn btn-danger" @click="deleteContract(contract.id)">Delete</button>
                     </td>
                 </tr>
             </tbody>
@@ -88,7 +89,10 @@
                                             <label for="">Currency</label>
                                             <select v-model="contract.prepayment_currency" class="form-control">
                                                 <option value="" disabled>Select Currency</option>
-                                                <option v-for="currency,i in currencies" :key="i" :value="currency">{{ currency }}</option>
+                                                <option v-for="currency,i in currencies" :key="i" :value="currency">
+                                                    <span v-if="currency == 'IQD'" class="badge badge-success">{{ currency  }}</span>
+                                                    <span v-if="currency == 'USD'" class="badge badge-primary">{{ currency  }}</span>
+                                                </option>
                                             </select>
                                         </div>
 
@@ -210,6 +214,12 @@ export default {
         };
     },
     methods: {
+        deleteContract(id) {
+            axios.delete(`/api/contract/${id}`).then(() => {
+                toastr.success("Contract Successfully Deleted")
+                this.getContracts()
+            }).catch(e => toastr.error(e.message))
+        },
         deleteCred(index) {
             console.log(this.credentials[index])
             this.credentials.splice(index, 1)
@@ -223,6 +233,8 @@ export default {
             axios.post('/api/contract', this.contract).then(r => {
                 this.getContracts()
                 $('#contractModal').modal('hide')
+            }).catch(e => {
+                toastr.error(e.message)
             })
         },
         edit(id) {
@@ -231,6 +243,8 @@ export default {
             axios.get("/api/contract/" + id).then(resp => {
                 this.contract = resp.data
                 this.credentials = this.contract.credentials
+            }).catch(e => {
+                toastr.error(e.message)
             })
 
             $('#contractModal').modal()
@@ -238,6 +252,8 @@ export default {
         update() {
             axios.put("/api/contract/" + this.contract.id, this.contract).then(resp => {
                 this.contracts = resp.data
+            }).catch(e => {
+                toastr.error(e.message)
             })
             $('#contractModal').modal("hide")
             this.is_edit = false
@@ -266,7 +282,9 @@ export default {
 
         // Customers
         getCustomers() {
-            axios.get('/api/customer-list').then(r => this.customers = r.data)
+            axios.get('/api/customer-list').then(r => this.customers = r.data).catch(e => {
+                toastr.error(e.message)
+            })
         },
 
 
