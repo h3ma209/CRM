@@ -297,18 +297,67 @@ export default {
         getTotal() {
             this.total = this.receipt.details.reduce((acc, item) => acc + (item.price * item.quantity), 0)
         },
+        printLayout(content, css) {
+            const w = 768
+            const h = 600
+            const y = window.top.outerHeight / 2 + window.top.screenY - (h / 2)
+            const x = window.top.outerWidth / 2 + window.top.screenX - (w / 2)
+            const newWindow = window.open('', '', `top=${y},left=${x},width=${w},height=${h},toolbar=0,titlebar=0,scrollbars=0,status=0`)
+
+            const style = `<style>
+            
+                
+            </style>`
+
+            newWindow.document.open()
+            newWindow.document.write(`<html>`);
+            newWindow.document.write(`<head><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous"></head>`);
+            newWindow.document.write(`<body>`);
+            newWindow.document.write(`<style>
+            *, *::before, *::after { box-sizing: border-box; }
+
+                body {
+                    margin: 0;
+                    padding: 0;
+
+                    -webkit-transform: rotate(-90deg) scale(.68,.68); 
+                    -moz-transform:rotate(-90deg) scale(.58,.58); 
+                    font-family: sans-serif;
+                    
+                }
+                @media print {
+
+                    @page {size: landscape;}
+                    ${css}
+                }`)
+            newWindow.document.write(`${css}`)
+            newWindow.document.write('</style>')
+
+
+            newWindow.document.write(`<div id="content">${content}</div>`);
+
+            newWindow.document.write(`</body>`);
+            newWindow.document.write(`</html>`);
+
+            newWindow.document.close()
+            setTimeout(function () {
+                newWindow.focus()
+                newWindow.print()
+            }, 1000);
+
+            newWindow.onafterprint = function () {
+                newWindow.close()
+            }
+        },
         print(id) {
             axios.get("/api/receipt/" + id).then(resp => {
-                this.receipt.customer_id = resp.data[0].customer_id
-                this.receipt.date = resp.data[0].date
-                this.receipt.details = resp.data[0].details
-                this.last_receipt_num = resp.data[0].invoice_id
+                this.receipt.customer_id = resp.data.customer_id
+                this.receipt.date = resp.data.date
+                this.receipt.details = resp.data.details
+                this.last_receipt_num = resp.data.invoice_id
                 $("#printModal").modal()
-            }).then(function () {
-                let w = window.open("", "Test", "width=600,height=600,scrollbars=1,resizable=1")
-                w.document.write(document.querySelector('#printModal .modal-body').innerHTML)
-                w.document.close()
-                w.print()
+            }).then(() => {
+                this.printLayout(document.querySelector('#printModal .modal-body').innerHTML, `.row{font-size:14px;margin:10px;} .table{font-size:14px;}`)
             })
         },
         show(id) {
