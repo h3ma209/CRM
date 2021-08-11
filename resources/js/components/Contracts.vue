@@ -216,27 +216,10 @@ export default {
     methods: {
 
         // Contract Related
-        deleteContract(id) {
-            axios.delete(`/api/contract/${id}`).then(() => {
-                toastr.success("Contract Successfully Deleted")
-                this.getContracts()
-            }).catch(e => toastr.error(e.message))
-        },
-
         getContracts() {
             axios.get("/api/contract").then(r => this.contracts = r.data)
         },
-
-        deleteCred(index) {
-            if(this.credentials[index].id !== ''){
-                axios.delete('/api/contract/credential/'+this.credentials[index].id).then(toastr.success('Successfully deleted'+this.credentials[index].username))
-            }
-            this.credentials.splice(index, 1)
-            this.contract.user_quantity = this.credentials.length
-
-        },
-
-
+        
         create() {
             this.contract.credentials = this.credentials
             axios.post('/api/contract', this.contract).then(r => {
@@ -288,7 +271,22 @@ export default {
             this.credentials = []
 
         },
+        deleteContract(id) {
+            axios.delete(`/api/contract/${id}`).then(() => {
+                toastr.success("Contract Successfully Deleted")
+                this.getContracts()
+            }).catch(e => toastr.error(e.message))
+        },
 
+        // Credential related
+        deleteCred(index) {
+            if(this.credentials[index].id !== ''){
+                axios.delete('/api/contract/credential/'+this.credentials[index].id).then(toastr.success('Successfully deleted'+this.credentials[index].username))
+            }
+            this.credentials.splice(index, 1)
+            this.contract.user_quantity = this.credentials.length
+
+        },
         // Customers
         getCustomers() {
             axios.get('/api/customer-list').then(r => this.customers = r.data).catch(e => {

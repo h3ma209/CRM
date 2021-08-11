@@ -221,16 +221,24 @@ export default {
         };
     },
     methods: {
-        deleteCred(index) {
-            console.log(this.credentials[index])
-            this.credentials.splice(index, 1)
+
+
+        // Contract Related 
+
+        getContracts() {
+            axios.get(`/api/customer/${this.$route.params.id}/contracts`).then(r => this.contracts = r.data)
         },
-        deleteContract(id) {
-            axios.delete(`/api/contract/${id}`).then(() => {
-                toastr.success("Contract Successfully Deleted")
+
+        create() {
+            this.contract.credentials = this.credentials
+            axios.post('/api/contract', this.contract).then(r => {
                 this.getContracts()
-            }).catch(e => toastr.error(e.message))
+                $('#contractModal').modal('hide')
+            }).catch(e => {
+                toastr.error(e.message)
+            })
         },
+
         update() {
             axios.put("/api/contract/" + this.contract.id, this.contract).then(resp => {
                 this.contracts = resp.data
@@ -240,14 +248,13 @@ export default {
             $('#contractModal').modal("hide")
             this.is_edit = false
             this.getContracts()
-
-
         },
         edit(id) {
             this.is_edit = true
 
             axios.get("/api/contract/" + id).then(resp => {
                 this.contract = resp.data
+                this.credentials = this.contract.credentials
             }).catch(e => {
                 toastr.error(e.message)
             })
@@ -282,17 +289,23 @@ export default {
                 note: '',
             }
         },
-        getContracts() {
-            axios.get(`/api/customer/${this.$route.params.id}/contracts`).then(r => this.contracts = r.data)
-        },
-        create() {
-            this.contract.credentials = this.credentials
-            axios.post('/api/contract', this.contract).then(r => {
+
+
+        deleteContract(id) {
+            axios.delete(`/api/contract/${id}`).then(() => {
+                toastr.success("Contract Successfully Deleted")
                 this.getContracts()
-                $('#contractModal').modal('hide')
-            }).catch(e => {
-                toastr.error(e.message)
-            })
+            }).catch(e => toastr.error(e.message))
+        },
+
+        // Credential related
+        deleteCred(index) {
+            if (this.credentials[index].id !== '') {
+                axios.delete('/api/contract/credential/' + this.credentials[index].id).then(toastr.success('Successfully deleted' + this.credentials[index].username))
+            }
+            this.credentials.splice(index, 1)
+            this.contract.user_quantity = this.credentials.length
+
         },
 
         // Customers
