@@ -45,7 +45,7 @@
                         <button class="btn btn-primary" @click="edit(customer.id)">Edit</button>
                         <a class="btn btn-success" :href="'/customer/'+customer.id+'/receipts'">Receipts</a>
                         <a class="btn btn-secondary" :href="'/customer/'+customer.id+'/contracts'">Contracts</a>
-                        <button class="btn btn-block mt-2 btn-danger" @click="openMonthlyReceiptModal(customer.id)"><i class="fa fa-plus"></i> Monthly Receipt</button>
+                        <button class="btn btn-block mt-2 btn-danger" @click="openMonthlyReceiptModal(customer)"><i class="fa fa-plus"></i> Monthly Receipt</button>
                     </td>
                 </tr>
             </tbody>
@@ -54,6 +54,7 @@
         <pagination :data="customers" @pagination-change-page="getCustomers" :limit="5" :show-disabled="true"></pagination>
 
         <div class="modal" id="customerModal" tabindex="-1" role="dialog" aria-labelledby="customerModalLabel" aria-hidden="true">
+
             <div class="modal-dialog modal-xl" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -113,11 +114,14 @@
                 </div>
             </div>
         </div>
-        <div class="modal" id="monthlyModal" tabindex="-1" role="dialog" aria-labelledby="monthlyModal" aria-hidden="true">
+        <div class="modal" id="receiptModal" tabindex="-1" role="dialog" aria-labelledby="receiptModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-xl" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Contract</h5>
+                        <h5 class="modal-title">
+
+                            <span>Create Monthly Receipt</span>
+                        </h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -127,82 +131,180 @@
                             <div class="col-sm-6">
                                 <div class="form-group">
                                     <label for="">Customer Name</label>
-                                    <input type="text" v-model="customer_contract.customer.name" disabled>
-                                </div>
-                                <div class="form-group">
-                                    <div class="row">
-                                        <div class="col-sm-6">
-                                            <label for="">Start Date</label>
-                                            <input type="date" class="form-control" v-model="customer_contract.start_date" disabled>
-                                        </div>
-                                        <div class="col-sm-6">
-                                            <label for="">Expire Date</label>
-                                            <input type="date" class="form-control" v-model="customer_contract.expire_date" disabled>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <div class="row">
-                                        <div class="col-sm-6">
-                                            <label for="">Prepayment</label>
-                                            <input type="number" class="form-control" v-model="customer_contract.prepayment" disabled>
-                                        </div>
-                                        <div class="col-sm-4">
-                                            <label for="">Currency</label>
-                                            <select v-model="customer_contract.prepayment_currency" class="form-control" disabled>
-                                                <option value="" disabled>Select Currency</option>
-                                                <option v-for="currency,i in currencies" :key="i" :value="currency">
-                                                    <span v-if="currency == 'IQD'" class="badge badge-success">{{ currency  }}</span>
-                                                    <span v-if="currency == 'USD'" class="badge badge-primary">{{ currency  }}</span>
-                                                </option>
-                                            </select>
-                                        </div>
-
-                                    </div>
-                                    <div class="row mt-2">
-                                        <div class="col-sm-6">
-                                            <label for="">Monthly Payment</label>
-                                            <input type="number" class="form-control" v-model="customer_contract.monthly_payment" disabled>
-                                        </div>
-                                        <div class="col-sm-4">
-                                            <label for="">Currency</label>
-                                            <select v-model="customer_contract.monthly_payment_currency" class="form-control" disabled>
-                                                <option value="" disabled>Select Currency</option>
-                                                <option v-for="currency,i in currencies" :key="i" :value="currency">{{ currency }}</option>
-                                            </select>
-                                        </div>
-                                    </div>
+                                    <select v-model="receipt.customer_id" class="form-control">
+                                        <option value="" disabled>Select customer</option>
+                                        <option v-for="customer in customers.data" :key="customer.id" :value="customer.id">{{ customer.name }}</option>
+                                    </select>
                                 </div>
                             </div>
-                            <div class="col-sm-6">
+                            <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label for="">User Quantity</label>
-                                    <input type="number" class="form-control" v-model="customer_contract.user_quantity" min='1' disabled>
-                                </div>
-                                <div class="form-group">
-                                    <label for="">Free Trial Durtation</label>
-                                    <input type="text" class="form-control" v-model="customer_contract.free_trial_duration" disabled>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="">No Months:</label>
-                                    <input type="number" class="form-control" v-model="customer_contract.number_of_months" min='1'>
-                                </div>
-                                <div class="form-group">
-                                    <label for="">Receipt Note</label>
-                                    <textarea class="form-control" v-model="customer_contract.receipt_note"></textarea>
+                                    <label for="">Date</label>
+                                    <input type="date" class="form-control" v-model="receipt.date">
                                 </div>
                             </div>
-                            <div class="col-3">
+                            <div class="col-sm-3">
                                 <div class="form-group">
-                                    <label for="">Total</label>
-                                    <span type="text" class="form-control">{{(customer_contract.user_quantity * customer_contract.monthly_payment) * customer_contract.number_of_months }}</span>
+                                    <label for="">Receipt Num:</label>
+                                    <input type="number" class="form-control" v-model="last_receipt_num" disabled>
                                 </div>
                             </div>
                         </div>
+                        <div class="row">
+                            <button class="btn btn-primary m-3" @click="addRow">
+                                Add +
+                            </button>
+                            <table class="table table-bordered table-stripped">
+                                <thead>
+                                    <tr>
+                                        <th>Item Name</th>
+                                        <th>Quantity</th>
+                                        <th>Price</th>
+                                        <th>Total</th>
+                                        <th>Currency</th>
+                                        <th>Note</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id='tbody'>
+                                    <tr v-for="detail, i in receipt.details" :key="i">
+                                        <td>
+                                            <div class="form-group">
+                                                <input class="form-control" type="text" v-model="detail.name">
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group">
+                                                <input class="form-control" type="number" v-model.number="detail.quantity">
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group">
+                                                <input class="form-control" type="number" v-model.number="detail.price">
+                                            </div>
+                                        </td>
+                                        <td>{{ detail.quantity * detail.price }}</td>
+                                        <td>
+                                            <select v-model="detail.currency" class="form-control">
+                                                <option value="" disabled>Select Currency</option>
+                                                <option v-for="currency,i in currencies" :key="i" :value="currency">{{ currency }}</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <div class="form-group">
+                                                <textarea class="form-control" rows="1" v-model="detail.note"></textarea>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-danger" @click="deleteRow(i)">Delete</button>
+                                        </td>
+
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td>Total: {{Number(total).toLocaleString()}}</td>
+                                    <td></td>
+                                </tfoot>
+                            </table>
+                        </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" @click="createMonthlyReceipt(customer_contract.id)">Create</button>
+                        <button type="button" class="btn btn-primary" v-if="!is_edit" @click="createMonthlyReceipt(customer_contract.customer_id)">Create</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- print modal -->
+        <div class="modal" id="printModal" tabindex="-1" role="dialog" aria-labelledby="printModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <span>Receipt</span>
+
+                        </h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label for=""><strong>Name:</strong></label>
+                                    <span>{{getCustomerById}}</span>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label for=""><strong>Date:</strong></label>
+                                    <span>
+                                        {{receipt.date}}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label for=""><strong>No:</strong></label>
+                                    <span>{{last_receipt_num}}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+
+                            <table class="table table-bordered table-stripped">
+                                <thead>
+                                    <tr>
+                                        <th>Item Name</th>
+                                        <th>Quantity</th>
+                                        <th>Price</th>
+                                        <th>Total</th>
+                                        <th>Note</th>
+                                    </tr>
+                                </thead>
+                                <tbody id='tbody'>
+                                    <tr v-for="detail, i in receipt.details" :key="i">
+                                        <td>
+                                            <div class="form-group">
+                                                <span type="text">{{detail.name}}</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group">
+                                                <span type="number">{{detail.quantity}}</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group">
+                                                <span type="number">{{detail.price}}</span>
+                                            </div>
+                                        </td>
+                                        <td>{{ Number(detail.quantity * detail.price).toLocaleString() }}</td>
+                                        <td>
+                                            <div class="form-group">
+                                                <p>{{detail.note}}</p>
+                                            </div>
+                                        </td>
+
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td>Total: {{Number(total).toLocaleString()}}</td>
+                                    <td></td>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
 
                         <button type="button" class="btn btn-secondary" data-dismiss="modal" @click="reset">
                             Close
@@ -221,6 +323,9 @@ export default {
     components: {},
     data() {
         return {
+
+            total: 0,
+            last_receipt_num: 0,
             currencies: ['IQD', "USD"],
             customer_contract: {
                 id: '',
@@ -248,7 +353,20 @@ export default {
                 },
 
             },
-            customer_monthly_receipt: [],
+            receipt: {
+                id: '',
+                customer_id: '',
+
+                date: moment(new Date).format('YYYY-MM-DD'),
+                contract_id: '',
+                details: [{
+                    'name': 'Monthly Payment',
+                    'price': 0,
+                    'quantity': 1,
+                    'currency': "IQD",
+                    'note': '',
+                }]
+            },
             is_edit: false,
             customers: {},
             customer: {
@@ -266,54 +384,119 @@ export default {
         };
     },
     methods: {
+        getTotal() {
+            this.total = this.receipt.details.reduce((acc, item) => acc + (item.price * item.quantity), 0)
+        },
+        resetReceipt() {
+            this.receipt = {
+                customer_id: '',
+                date: moment(new Date).format('YYYY-MM-DD'),
+                details: [{
+                    'name': '',
+                    'price': '',
+                    'quantity': 1,
+                    'currency': "IQD",
+                    'note': ''
+                }]
+            }
+            this.getReceiptNum();
+        },
+        addRow() {
+            console.log('adding')
+            this.receipt.details.push({
+                "id": '',
+                "receipt_id": this.last_receipt_num,
+                'name': 'Monthly Payment',
+                'price': this.customer_contract.monthly_payment,
+                'quantity': 1,
+                "currency": this.customer_contract.monthly_payment_currency,
+                'note': ''
+            });
+        },
+        deleteRow(id) {
+            let dt = this.receipt.details[id]
+            this.receipt.details.splice(id, 1);
+            console.log(dt)
+            if (dt.id != '') {
+                axios.delete('/api/receipt/detail/' + dt.id).then(r => console.log(r.data)).catch(e => {
+                    toastr.error(e.response.data.message)
+                })
+            }
+        },
 
-        openMonthlyReceiptModal(id) {
 
-
+        openMonthlyReceiptModal(customer) {
             if (confirm('are you sure?')) {
-                this.getCustomerContracts(id)
-                $("#monthlyModal").modal()
+                this.getCustomerContracts(customer)
+                $("#receiptModal").modal()
             }
         },
         createMonthlyReceipt(id) {
-            axios.get(`/api/customer/${id}/new-monthly-receipt`).then(response => {
+            axios.post(`/api/customer/${id}/new-monthly-receipt`, this.receipt).then(response => {
+                
                 this.customer_monthly_receipt = response.data
                 toastr.success('successfully created')
-
-                let w = window.open("", "Test", "width=600,height=600,scrollbars=1,resizable=1")
-                w.document.write(`
-                        <html>
-                            <head></head>
-                            <body>
-                                test
-                                <table border="1" cell-border="1">
-                                    <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>Item</th>
-                                            <th>Quantity</th>
-                                            <th>Price</th>
-                                            <th>Note</th>
-                                        </tr>
-                                    </thead>
-                                </table>
-                            </body>
-                        </html>
-                    `)
-                w.document.close()
-
-                setTimeout(function () {
-
-                    w.focus()
-                    w.print()
-                }, 100)
-                w.onafterprint = function () {
-                    w.close()
-                }
+                this.getReceiptNum()
+                this.printLayout(document.querySelector('#printModal .modal-body').innerHTML, `.row{font-size:14px;margin:10px;} .table{font-size:14px;}`)
             }).catch(e => {
-                toastr.error(e.response.data.message)
+                console.log(e)
+                toastr.error(e.message)
             })
         },
+        printLayout(content, css) {
+            const w = 768
+            const h = 600
+            const y = window.top.outerHeight / 2 + window.top.screenY - (h / 2)
+            const x = window.top.outerWidth / 2 + window.top.screenX - (w / 2)
+            const newWindow = window.open('', '', `top=${y},left=${x},width=${w},height=${h},toolbar=0,titlebar=0,scrollbars=0,status=0`)
+
+            const style = `<style>
+            
+                
+            </style>`
+
+            newWindow.document.open()
+            newWindow.document.write(`<html>`);
+            newWindow.document.write(`<head><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous"></head>`);
+            newWindow.document.write(`<body>`);
+            newWindow.document.write(`<style>
+            *, *::before, *::after { box-sizing: border-box; }
+
+                body {
+                    margin: 0;
+                    padding: 0;
+
+                    -webkit-transform: rotate(-90deg) scale(.68,.68); 
+                    -moz-transform:rotate(-90deg) scale(.58,.58); 
+                    font-family: sans-serif;
+                    
+                }
+                @media print {
+
+                    @page {size: landscape;}
+                    ${css}
+                }`)
+            newWindow.document.write(`${css}`)
+            newWindow.document.write('</style>')
+
+
+            newWindow.document.write(`<div id="content">${content}</div>`);
+
+            newWindow.document.write(`</body>`);
+            newWindow.document.write(`</html>`);
+
+            newWindow.document.close()
+            setTimeout(function () {
+                newWindow.focus()
+                newWindow.print()
+            }, 1000);
+
+            newWindow.onafterprint = function () {
+                newWindow.close()
+            }
+        },
+
+
 
         reset() {
             this.customer = {
@@ -341,13 +524,18 @@ export default {
             })
             $('#customerModal').modal()
         },
-        getCustomerContracts(id) {
-            axios.get(`/api/customer/${id}/contracts`).then(resp => {
+        getCustomerContracts(customer) {
+            axios.get(`/api/customer/${customer.id}/contracts`).then(resp => {
                 let r = resp.data.data[0]
-                r.number_of_months = Number(1)
-                r.receipt_note = "payment of"
+                // r.number_of_months = Number(1)
+                // r.receipt_note = "payment of"
                 console.log(r)
                 this.customer_contract = r
+                this.receipt.customer_id = this.customer_contract.customer_id
+                this.receipt.details[0].price = this.customer_contract.monthly_payment
+                this.receipt.details[0].currency = this.customer_contract.monthly_payment_currency
+
+
             });
 
         },
@@ -368,13 +556,13 @@ export default {
                 }
             }).then(r => this.customers = r.data)
         },
-        updateReceiptNote() {
-            let u_n = this.customer_contract.user_quantity
-            let m_p = this.customer_contract.monthly_payment
-            let n_m = this.customer_contract.number_of_months
-            this.customer_contract.receipt_note = `Payment for ${u_n} users of ${n_m} months`
-            console.log(this.customer_contract.receipt_note)
-        },
+        // updateReceiptNote() {
+        //     // let u_n = this.customer_contract.user_quantity
+        //     // let m_p = this.customer_contract.monthly_payment
+        //     let n_m = this.customer_contract.number_of_months
+        //     this.customer_contract.receipt_note = `Payment for ${u_n} users of ${n_m} months`
+        //     console.log(this.customer_contract.receipt_note)
+        // },
         create() {
             axios.post('/api/customer', this.customer).then(r => {
                 this.getCustomers()
@@ -386,17 +574,36 @@ export default {
                 })
                 toastr.error(`<ul>${errors}</ul>`)
             })
+        },
+        getReceiptNum() {
+            axios.get("/api/receipt/new-invoice-no").then(r => this.last_receipt_num = r.data)
         }
     },
-    mounted() {
+    created() {
         this.getCustomers();
+        this.getReceiptNum();
+    },
+    computed: {
+        getCustomerById() {
+            if (this.receipt.customer_id != '') {
+                return this.customers.data.find(item => item.id === this.receipt.customer_id).name
+
+            }
+        },
     },
     watch: {
         customer_contract: {
             handler(val) {
-                this.updateReceiptNote()
+                // this.updateReceiptNote()
             },
             deep: true
+        },
+        receipt: {
+            handler(val) {
+                this.getTotal();
+                console.log(val)
+            },
+            deep: true,
         }
     }
 };

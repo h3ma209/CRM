@@ -13,7 +13,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('customer-list', [CustomerController::class, 'list']);
     Route::get('customer/{customer}/contracts', [CustomerController::class, 'contracts']);
     Route::get('customer/{customer}/receipts', [CustomerController::class, 'receipts']);
-    Route::get('customer/{customer}/new-monthly-receipt', [CustomerController::class, 'newMonthlyReceipt']);
+    Route::post('customer/{customer}/new-monthly-receipt', [CustomerController::class, 'newMonthlyReceipt']);
     Route::apiResource('customer', CustomerController::class);
 
     Route::get('receipt/new-invoice-no', [ReceiptController::class, 'newInvoiceNumber']);

@@ -85,6 +85,7 @@ class CustomerController extends Controller
 
     public function newMonthlyReceipt(Request $request, $customer)
     {
+
         $contract = Contract::where('customer_id', $customer)->latest()->first();
 
         if (! $contract) {
@@ -109,12 +110,7 @@ class CustomerController extends Controller
 
         if ($receipt) {
             // Create Details
-            $receipt->details()->create([
-                'name' => 'Monthly Payment',
-                'price' => $contract->monthly_payment,
-                'quantity' => $contract->user_quantity,
-                "currency"=> $contract->monthly_payment_currency
-            ]);
+            $receipt->details()->createMany($request->details);
 
             // Update last invoice number
             LastInvoiceNumber::find(1)->update(['last_invoice_no' => $invoiceid]);
