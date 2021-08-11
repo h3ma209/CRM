@@ -384,6 +384,29 @@ export default {
         };
     },
     methods: {
+
+        // Receipt Related
+
+        addRow() {
+            this.receipt.details.push({
+                "id": '',
+                "receipt_id": this.last_receipt_num,
+                'name': 'Monthly Payment',
+                'price': this.customer_contract.monthly_payment,
+                'quantity': 1,
+                "currency": this.customer_contract.monthly_payment_currency,
+                'note': ''
+            });
+        },
+        deleteRow(id) {
+            let dt = this.receipt.details[id]
+            this.receipt.details.splice(id, 1);
+            if (dt.id != '') {
+                axios.delete('/api/receipt/detail/' + dt.id).then(r => r.data).catch(e => {
+                    toastr.error(e.response.data.message)
+                })
+            }
+        },
         getTotal() {
             this.total = this.receipt.details.reduce((acc, item) => acc + (item.price * item.quantity), 0)
         },
@@ -401,30 +424,13 @@ export default {
             }
             this.getReceiptNum();
         },
-        addRow() {
-            console.log('adding')
-            this.receipt.details.push({
-                "id": '',
-                "receipt_id": this.last_receipt_num,
-                'name': 'Monthly Payment',
-                'price': this.customer_contract.monthly_payment,
-                'quantity': 1,
-                "currency": this.customer_contract.monthly_payment_currency,
-                'note': ''
-            });
+        getReceiptNum() {
+            axios.get("/api/receipt/new-invoice-no").then(r => this.last_receipt_num = r.data)
         },
-        deleteRow(id) {
-            let dt = this.receipt.details[id]
-            this.receipt.details.splice(id, 1);
-            console.log(dt)
-            if (dt.id != '') {
-                axios.delete('/api/receipt/detail/' + dt.id).then(r => console.log(r.data)).catch(e => {
-                    toastr.error(e.response.data.message)
-                })
-            }
-        },
+        //--------------------
 
 
+        // Receipt Modal Related
         openMonthlyReceiptModal(customer) {
             if (confirm('are you sure?')) {
                 this.getCustomerContracts(customer)
@@ -433,13 +439,13 @@ export default {
         },
         createMonthlyReceipt(id) {
             axios.post(`/api/customer/${id}/new-monthly-receipt`, this.receipt).then(response => {
-                
+
                 this.customer_monthly_receipt = response.data
                 toastr.success('successfully created')
                 this.getReceiptNum()
                 this.printLayout(document.querySelector('#printModal .modal-body').innerHTML, `.row{font-size:14px;margin:10px;} .table{font-size:14px;}`)
             }).catch(e => {
-                console.log(e)
+                // console.log(e)
                 toastr.error(e.message)
             })
         },
@@ -495,9 +501,10 @@ export default {
                 newWindow.close()
             }
         },
+        //-----------------------
 
 
-
+        // Customer Related
         reset() {
             this.customer = {
                 name: '',
@@ -529,7 +536,6 @@ export default {
                 let r = resp.data.data[0]
                 // r.number_of_months = Number(1)
                 // r.receipt_note = "payment of"
-                console.log(r)
                 this.customer_contract = r
                 this.receipt.customer_id = this.customer_contract.customer_id
                 this.receipt.details[0].price = this.customer_contract.monthly_payment
@@ -556,13 +562,7 @@ export default {
                 }
             }).then(r => this.customers = r.data)
         },
-        // updateReceiptNote() {
-        //     // let u_n = this.customer_contract.user_quantity
-        //     // let m_p = this.customer_contract.monthly_payment
-        //     let n_m = this.customer_contract.number_of_months
-        //     this.customer_contract.receipt_note = `Payment for ${u_n} users of ${n_m} months`
-        //     console.log(this.customer_contract.receipt_note)
-        // },
+
         create() {
             axios.post('/api/customer', this.customer).then(r => {
                 this.getCustomers()
@@ -575,9 +575,8 @@ export default {
                 toastr.error(`<ul>${errors}</ul>`)
             })
         },
-        getReceiptNum() {
-            axios.get("/api/receipt/new-invoice-no").then(r => this.last_receipt_num = r.data)
-        }
+        //------------
+
     },
     created() {
         this.getCustomers();
@@ -601,7 +600,7 @@ export default {
         receipt: {
             handler(val) {
                 this.getTotal();
-                console.log(val)
+                
             },
             deep: true,
         }

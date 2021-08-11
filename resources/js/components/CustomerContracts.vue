@@ -95,7 +95,10 @@
                                             <label for="">Currency</label>
                                             <select v-model="contract.prepayment_currency" class="form-control">
                                                 <option value="" disabled>Select Currency</option>
-                                                <option v-for="currency,i in currencies" :key="i" :value="currency">{{ currency }}</option>
+                                                <option v-for="currency,i in currencies" :key="i" :value="currency">
+                                                    <span v-if="currency == 'IQD'" class="badge badge-success">{{ currency  }}</span>
+                                                    <span v-if="currency == 'USD'" class="badge badge-primary">{{ currency  }}</span>
+                                                </option>
                                             </select>
                                         </div>
 
@@ -139,6 +142,7 @@
                                             <th>Username</th>
                                             <th>Password</th>
                                             <th>Note</th>
+
                                         </tr>
                                     </thead>
                                     <tbody id='tbody'>

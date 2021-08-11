@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Contract;
 use App\Models\CustomerCredentials;
 use Illuminate\Http\Request;
 
@@ -82,7 +83,10 @@ class CustomerCredentialsController extends Controller
     {
         $cred = CustomerCredentials::find($id);
         if($cred){
-            $cred->delete();
+            if($contract = Contract::find($cred->contract_id)){
+                $contract->update(['user_quantity'=>$contract->user_quanityt-1]);
+                $cred->delete();
+            }
         }
 
     }

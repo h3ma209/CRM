@@ -214,19 +214,28 @@ export default {
         };
     },
     methods: {
+
+        // Contract Related
         deleteContract(id) {
             axios.delete(`/api/contract/${id}`).then(() => {
                 toastr.success("Contract Successfully Deleted")
                 this.getContracts()
             }).catch(e => toastr.error(e.message))
         },
-        deleteCred(index) {
-            console.log(this.credentials[index])
-            this.credentials.splice(index, 1)
-        },
+
         getContracts() {
             axios.get("/api/contract").then(r => this.contracts = r.data)
         },
+
+        deleteCred(index) {
+            if(this.credentials[index].id !== ''){
+                axios.delete('/api/contract/credential/'+this.credentials[index].id).then(toastr.success('Successfully deleted'+this.credentials[index].username))
+            }
+            this.credentials.splice(index, 1)
+            this.contract.user_quantity = this.credentials.length
+
+        },
+
 
         create() {
             this.contract.credentials = this.credentials
@@ -298,6 +307,12 @@ export default {
             handler(val) {
                 if (val.credentials) {
                     this.credentials = val.credentials
+                    for(var i=0; i< val.user_quantity; i++){
+                        let cred = this.credentials[i]
+                        if (cred===undefined){
+                            this.credentials.push({})
+                        }
+                    }
                 }
                 else {
                     let l = []

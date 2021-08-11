@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Contract;
+use App\Models\CustomerCredentials;
 use Illuminate\Http\Request;
 
 class ContractController extends Controller
@@ -63,7 +64,15 @@ class ContractController extends Controller
         ]);
 
         $contract->update($validated_contract);
-        $contract->credentials()->updateMany($validated_contract['credentials']);
+        foreach($request->credentials as $creds){
+            CustomerCredentials::updateOrCreate(
+                [
+                    "id"=>$creds['id']
+                ],
+                $creds
+                
+            );
+        }
 
         return $contract;
     }
