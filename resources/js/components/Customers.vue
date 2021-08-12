@@ -433,8 +433,8 @@ export default {
         // Receipt Modal Related
         openMonthlyReceiptModal(customer) {
             if (confirm('are you sure?')) {
-                this.getCustomerContracts(customer)
-                $("#receiptModal").modal()
+                this.getCustomerContracts(customer).then
+                
             }
         },
         createMonthlyReceipt(id) {
