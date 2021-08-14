@@ -64,13 +64,22 @@ class ContractController extends Controller
         ]);
 
         $contract->update($validated_contract);
-        foreach($request->credentials as $creds){
+        foreach ($request->credentials as $creds) {
+            if (isset($creds['contract_id'])) {
+                
+
+            } else {
+                $creds['contract_id']= $contract->id;
+
+            }
+
+
             CustomerCredentials::updateOrCreate(
                 [
-                    "id"=>$creds['id']
+                    "id" => $creds['id']
                 ],
                 $creds
-                
+
             );
         }
 

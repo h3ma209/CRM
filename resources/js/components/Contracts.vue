@@ -13,6 +13,7 @@
                     <th>Monthly Payment</th>
                     <th>User Quantity</th>
                     <th>Note</th>
+                    <th>Free trial</th>
                     <th>Created at</th>
                     <th>Actions</th>
                 </tr>
@@ -129,6 +130,9 @@
                         </div>
                         <div class="row ">
                             <div class="col mt-2">
+                                <button class="btn btn-primary m-3" @click="addRow">
+                                    Add +
+                                </button>
                                 <table class="table table-bordered table-stripped">
                                     <thead>
                                         <tr>
@@ -219,7 +223,7 @@ export default {
         getContracts() {
             axios.get("/api/contract").then(r => this.contracts = r.data)
         },
-        
+
         create() {
             this.contract.credentials = this.credentials
             axios.post('/api/contract', this.contract).then(r => {
@@ -272,20 +276,34 @@ export default {
 
         },
         deleteContract(id) {
-            axios.delete(`/api/contract/${id}`).then(() => {
-                toastr.success("Contract Successfully Deleted")
-                this.getContracts()
-            }).catch(e => toastr.error(e.message))
+            if (confirm("Do you want to delete this contract")) {
+                axios.delete(`/api/contract/${id}`).then(() => {
+                    toastr.success("Contract Successfully Deleted")
+                    this.getContracts()
+                }).catch(e => toastr.error(e.message))
+            }
+
         },
 
         // Credential related
         deleteCred(index) {
-            if(this.credentials[index].id !== ''){
-                axios.delete('/api/contract/credential/'+this.credentials[index].id).then(toastr.success('Successfully deleted'+this.credentials[index].username))
+            if (this.credentials[index].id !== '') {
+                axios.delete('/api/contract/credential/' + this.credentials[index].id).then(toastr.success('Successfully deleted' + this.credentials[index].username))
             }
             this.credentials.splice(index, 1)
-            this.contract.user_quantity = this.credentials.length
+            
 
+        },
+        addRow() {
+            this.credentials.push({
+                "id": '',
+                "receipt_id": this.last_receipt_num,
+                'name': '',
+                'price': '',
+                'quantity': 1,
+                "currency": "IQD",
+                'note': ''
+            });
         },
         // Customers
         getCustomers() {
@@ -303,22 +321,22 @@ export default {
     watch: {
         contract: {
             handler(val) {
-                if (val.credentials) {
-                    this.credentials = val.credentials
-                    for(var i=0; i< val.user_quantity; i++){
-                        let cred = this.credentials[i]
-                        if (cred===undefined){
-                            this.credentials.push({})
-                        }
-                    }
-                }
-                else {
-                    let l = []
-                    for (var i = 0; i < val.user_quantity; i++) {
-                        l.push({})
-                    }
-                    this.credentials = l
-                }
+                // if (val.credentials) {
+                //     this.credentials = val.credentials
+                //     for (var i = 0; i < val.user_quantity; i++) {
+                //         let cred = this.credentials[i]
+                //         if (cred === undefined) {
+                //             this.credentials.push({})
+                //         }
+                //     }
+                // }
+                // else {
+                //     let l = []
+                //     for (var i = 0; i < val.user_quantity; i++) {
+                //         l.push({})
+                //     }
+                //     this.credentials = l
+                // }
             },
             deep: true,
         }
