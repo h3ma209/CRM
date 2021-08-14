@@ -433,8 +433,9 @@ export default {
         // Receipt Modal Related
         openMonthlyReceiptModal(customer) {
             if (confirm('are you sure?')) {
-                this.getCustomerContracts(customer).then
-                
+                this.getCustomerContracts(customer)
+                $('#receiptModal').modal()
+
             }
         },
         createMonthlyReceipt(id) {
@@ -541,7 +542,6 @@ export default {
                 this.receipt.details[0].price = this.customer_contract.monthly_payment
                 this.receipt.details[0].currency = this.customer_contract.monthly_payment_currency
 
-
             });
 
         },
@@ -600,7 +600,7 @@ export default {
         receipt: {
             handler(val) {
                 this.getTotal();
-                
+
             },
             deep: true,
         }

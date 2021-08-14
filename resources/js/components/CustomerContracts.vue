@@ -18,11 +18,13 @@
                     <th>Monthly Payment</th>
                     <th>User Quantity</th>
                     <th>Note</th>
+                    <th>Free Trial</th>
                     <th>Created at</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
+
 
                 <tr v-for="(contract, i) in contracts.data" :key="i">
                     <th>{{ contracts.data.length-i }}</th>
@@ -48,7 +50,6 @@
                         <a class="btn btn-success" :href="'/customer/'+contract.customer_id+'/receipts'">Receipts</a>
                         <a class="btn btn-warning" :href="'/customer/'+contract.customer_id+'/contracts'">Contracts</a>
                         <button class="btn btn-danger" @click="deleteContract(contract.id)">Delete</button>
-
                     </td>
                 </tr>
             </tbody>
