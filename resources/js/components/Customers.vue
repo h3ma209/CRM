@@ -212,7 +212,7 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" v-if="!is_edit" @click="createMonthlyReceipt(customer_contract.customer_id)">Create</button>
+                        <button type="button" class="btn btn-primary" v-if="!is_edit" @click="createMonthlyReceipt(receipt.customer_id)">Create</button>
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">
                             Close
                         </button>
@@ -522,13 +522,7 @@ export default {
             this.is_edit = true
 
             axios.get("/api/customer/" + id).then(resp => {
-                this.customer.name = resp.data.name
-                this.customer.address = resp.data.address
-                this.customer.contact_1 = resp.data.contact_1
-                this.customer.contact_2 = resp.data.contact_2
-                this.customer.email = resp.data.email
-                this.customer.note = resp.data.note
-                this.customer.id = resp.data.id
+                this.customer = resp.data
             })
             $('#customerModal').modal()
         },
@@ -567,6 +561,7 @@ export default {
             axios.post('/api/customer', this.customer).then(r => {
                 this.getCustomers()
                 $('#customerModal').modal('hide')
+                this.reset()
             }).catch(e => {
                 let errors = ''
                 Object.keys(e.response.data.errors).forEach(el => {

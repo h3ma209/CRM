@@ -31,7 +31,7 @@ class CustomerController extends Controller
     public function store(Request $request)
     {
         $request->merge(['user_id' => auth()->user()->id]);
-
+        
         $validated_customer = $request->validate([
             'user_id' => 'required',
             'name' => 'required|string',
@@ -49,7 +49,8 @@ class CustomerController extends Controller
 
     public function show($id)
     {
-        return Customer::with("credentials")->where('id',$id);
+        return Customer::find($id);
+        
 
     }
 
