@@ -385,6 +385,10 @@ export default {
             this.is_edit = true
 
             axios.get("/api/receipt/" + id).then(resp => {
+                this.receipt.guest = Boolean(Number(resp.data.customer.guest))
+                if (this.receipt.guest) {
+                    this.receipt.name = resp.data.customer.name
+                }
                 this.receipt.customer_id = resp.data.customer_id
                 this.receipt.date = resp.data.date
                 this.receipt.details = resp.data.details
@@ -480,7 +484,7 @@ export default {
     computed: {
         getCustomerById() {
             if (this.receipt.customer_id != '') {
-                return this.customers.find(item => item.id === this.receipt.customer_id).name
+                return this.customers.find(item => item.id === this.receipt.customer_id)
 
             }
         },

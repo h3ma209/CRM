@@ -13,7 +13,7 @@ class CustomerController extends Controller
 {
     public function list()
     {
-        return Customer::select('id', 'name')->get();
+        return Customer::where('guest', '0')->select('id', 'name')->get();
     }
 
     public function index(Request $request)
@@ -21,7 +21,7 @@ class CustomerController extends Controller
         $start_date = $request->start_date;
         $end_date = $request->end_date ?? $start_date;
 
-        $customers = Customer::where('guest','0')->when($start_date, function ($q) use ($start_date, $end_date) {
+        $customers = Customer::where('guest', '0')->when($start_date, function ($q) use ($start_date, $end_date) {
             $q->whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date]);
         })->latest();
 
@@ -31,30 +31,16 @@ class CustomerController extends Controller
     public function store(Request $request)
     {
         $request->merge(['user_id' => auth()->user()->id]);
-        if ($request['guest']) {
-            dd($request);
-            $validated_customer = $request->validate([
-                'user_id' => 'required',
-                'name' => 'required|string',
-                'address' => 'nullable|string',
-                'contact_1' => 'nullable|string',
-                'contact_2' => 'nullable|string',
-                'email' => 'nullable|string',
-                'note' => 'nullable|string',
-                'guest'=> 1,
-            ]);
-        } else {
 
-            $validated_customer = $request->validate([
-                'user_id' => 'required',
-                'name' => 'required|string',
-                'address' => 'nullable|string',
-                'contact_1' => 'nullable|string',
-                'contact_2' => 'nullable|string',
-                'email' => 'nullable|string',
-                'note' => 'nullable|string',
-            ]);
-        }
+        $validated_customer = $request->validate([
+            'user_id' => 'required',
+            'name' => 'required|string',
+            'address' => 'nullable|string',
+            'contact_1' => 'nullable|string',
+            'contact_2' => 'nullable|string',
+            'email' => 'nullable|string',
+            'note' => 'nullable|string',
+        ]);
 
         $customer = Customer::create($validated_customer);
 
