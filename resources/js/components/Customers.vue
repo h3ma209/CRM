@@ -445,6 +445,7 @@ export default {
                 toastr.success('successfully created')
                 this.getReceiptNum()
                 this.printLayout(document.querySelector('#printModal .modal-body').innerHTML, `.row{font-size:14px;margin:10px;} .table{font-size:14px;}`)
+                $('#receiptModal').modal("hide")
             }).catch(e => {
                 // console.log(e)
                 toastr.error(e.message)

@@ -54,10 +54,19 @@
                                     <div class="col-sm-6">
                                         <div class="form-group">
                                             <label for="">Customer Name</label>
-                                            <select v-model="receipt.customer_id" class="form-control">
+                                            <select v-if="!receipt.guest" v-model="receipt.customer_id" class="form-control">
                                                 <option value="" disabled>Select customer</option>
                                                 <option v-for="customer in customers" :key="customer.id" :value="customer.id">{{ customer.name }}</option>
                                             </select>
+                                            <input v-if="receipt.guest" type="text" class="form-control" v-model="receipt.name">
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault" v-model="receipt.guest">
+                                                <label class="form-check-label" for="flexCheckDefault">
+                                                    Guest
+                                                </label>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="col-sm-3">

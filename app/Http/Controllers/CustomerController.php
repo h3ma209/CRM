@@ -21,7 +21,7 @@ class CustomerController extends Controller
         $start_date = $request->start_date;
         $end_date = $request->end_date ?? $start_date;
 
-        $customers = Customer::when($start_date, function($q) use($start_date, $end_date) {
+        $customers = Customer::where('guest','0')->when($start_date, function ($q) use ($start_date, $end_date) {
             $q->whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date]);
         })->latest();
 
@@ -31,16 +31,30 @@ class CustomerController extends Controller
     public function store(Request $request)
     {
         $request->merge(['user_id' => auth()->user()->id]);
-        
-        $validated_customer = $request->validate([
-            'user_id' => 'required',
-            'name' => 'required|string',
-            'address' => 'nullable|string',
-            'contact_1' => 'nullable|string',
-            'contact_2' => 'nullable|string',
-            'email' => 'nullable|string',
-            'note' => 'nullable|string',
-        ]);
+        if ($request['guest']) {
+            dd($request);
+            $validated_customer = $request->validate([
+                'user_id' => 'required',
+                'name' => 'required|string',
+                'address' => 'nullable|string',
+                'contact_1' => 'nullable|string',
+                'contact_2' => 'nullable|string',
+                'email' => 'nullable|string',
+                'note' => 'nullable|string',
+                'guest'=> 1,
+            ]);
+        } else {
+
+            $validated_customer = $request->validate([
+                'user_id' => 'required',
+                'name' => 'required|string',
+                'address' => 'nullable|string',
+                'contact_1' => 'nullable|string',
+                'contact_2' => 'nullable|string',
+                'email' => 'nullable|string',
+                'note' => 'nullable|string',
+            ]);
+        }
 
         $customer = Customer::create($validated_customer);
 
@@ -50,8 +64,6 @@ class CustomerController extends Controller
     public function show($id)
     {
         return Customer::find($id);
-        
-
     }
 
     public function update(Request $request, Customer $customer)
@@ -81,7 +93,7 @@ class CustomerController extends Controller
     }
     public function receipts(Request $request, $customer)
     {
-        return Receipt::where('customer_id', $customer)->with('customer','details')->latest()->paginate(20);
+        return Receipt::where('customer_id', $customer)->with('customer', 'details')->latest()->paginate(20);
     }
 
     public function newMonthlyReceipt(Request $request, $customer)
@@ -89,10 +101,10 @@ class CustomerController extends Controller
 
         $contract = Contract::where('customer_id', $customer)->latest()->first();
 
-        if (! $contract) {
+        if (!$contract) {
             return response(['message' => 'Customer does not have contract.'], 422);
         }
-        
+
         $invoiceid = LastInvoiceNumber::firstOrCreate(
             [
                 'id' => 1,

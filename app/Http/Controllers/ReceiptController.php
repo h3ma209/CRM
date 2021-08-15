@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Customer;
 use App\Models\Receipt;
 use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
@@ -34,6 +35,23 @@ class ReceiptController extends Controller
         $invoiceid = $invoiceid->last_invoice_no + 1;
 
         $request->merge(['invoice_id' => $invoiceid]);
+        $request->merge(['user_id' => auth()->user()->id]);
+        if ($request['guest']) {
+
+            $validated_customer = $request->validate([
+                'user_id' => 'required',
+                'name' => 'required|string',
+                'address' => 'nullable|string',
+                'contact_1' => 'nullable|string',
+                'contact_2' => 'nullable|string',
+                'email' => 'nullable|string',
+                'note' => 'nullable|string',
+                'guest' => 'boolean',
+            ]);
+
+            $customer = Customer::create($validated_customer);
+            $request->merge(['customer_id'=> $customer->id]);
+        }
 
         $validated_receipt = $request->validate([
             "customer_id" => "required|integer",
@@ -90,8 +108,7 @@ class ReceiptController extends Controller
         if ($receipt) {
             if ($receipt->details()->delete()) {
                 return $receipt->delete();
-            }
-            else{
+            } else {
                 return $receipt->delete();
             }
         } else {

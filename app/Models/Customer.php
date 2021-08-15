@@ -12,7 +12,7 @@ class Customer extends Model
 {
     use HasFactory, SoftDeletes, LogsActivity;
 
-    protected $fillable = ['user_id', 'name', 'address', 'contact_1', 'contact_2', 'free_trial', 'note', 'deleted_at', 'email'];
+    protected $fillable = ['user_id', 'name', 'address', 'contact_1', 'contact_2', 'free_trial', 'note', 'deleted_at', 'email', 'guest'];
 
     public function contracts()
     {
