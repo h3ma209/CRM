@@ -406,13 +406,19 @@ export default {
                 console.log(resp.data)
                 $('#receiptModal').modal('hide');
                 this.getReceiptNum();
+                toastr.success('Successfuly Edited Receipt');
+            }).catch(e =>{
+                toastr.error(e.response.data.message)
             })
+
 
         },
 
 
         getReceipts() {
-            axios.get('/api/receipt').then(r => this.receipts = r.data);
+            axios.get('/api/receipt').then(r => this.receipts = r.data).catch(e =>{
+                toastr.error(e.response.data.message)
+            });
         },
         deleteReceipt(id) {
             axios.delete('/api/receipt/' + id).then(r => {
@@ -424,7 +430,9 @@ export default {
             })
         },
         getCustomers() {
-            axios.get('/api/customer-list').then(r => this.customers = r.data)
+            axios.get('/api/customer-list').then(r => this.customers = r.data).catch(e =>{
+                toastr.error(e.response.data.message)
+            })
         },
         addRow() {
             this.receipt.details.push({
@@ -455,6 +463,9 @@ export default {
             axios.post('/api/receipt', this.receipt).then(r => {
                 this.getReceipts()
                 $('#receiptModal').modal('hide')
+                toastr.success('Successfuly Created Receipt')
+            }).catch(e =>{
+                toastr.error(e.response.data.message)
             })
             this.getReceiptNum()
         },
@@ -464,7 +475,9 @@ export default {
             this.reset()
         },
         getReceiptNum() {
-            axios.get("/api/receipt/new-invoice-no").then(r => this.last_receipt_num = r.data)
+            axios.get("/api/receipt/new-invoice-no").then(r => this.last_receipt_num = r.data).catch(e =>{
+                toastr.error(e.response.data.message)
+            })
         }
 
     },

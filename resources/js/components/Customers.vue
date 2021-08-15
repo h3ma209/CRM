@@ -58,7 +58,7 @@
             <div class="modal-dialog modal-xl" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Monthly Receipt</h5>
+                        <h5 class="modal-title">Create New Customer</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -425,7 +425,9 @@ export default {
             this.getReceiptNum();
         },
         getReceiptNum() {
-            axios.get("/api/receipt/new-invoice-no").then(r => this.last_receipt_num = r.data)
+            axios.get("/api/receipt/new-invoice-no").then(r => this.last_receipt_num = r.data).catch(e => {
+                toastr.error(e.response.data.message)
+            })
         },
         //--------------------
 
@@ -448,7 +450,7 @@ export default {
                 $('#receiptModal').modal("hide")
             }).catch(e => {
                 // console.log(e)
-                toastr.error(e.message)
+                toastr.error(e.response.data.message)
             })
         },
         printLayout(content, css) {
@@ -524,6 +526,8 @@ export default {
 
             axios.get("/api/customer/" + id).then(resp => {
                 this.customer = resp.data
+            }).catch(e => {
+                toastr.error(e.response.data.message)
             })
             $('#customerModal').modal()
         },
@@ -537,6 +541,8 @@ export default {
                 this.receipt.details[0].price = this.customer_contract.monthly_payment
                 this.receipt.details[0].currency = this.customer_contract.monthly_payment_currency
 
+            }).catch(e => {
+                toastr.error(e.response.data.message)
             });
 
         },
@@ -555,7 +561,9 @@ export default {
                     start_date: this.filter_start_date,
                     end_date: this.filter_end_date,
                 }
-            }).then(r => this.customers = r.data)
+            }).then(r => this.customers = r.data).catch(e => {
+                toastr.error(e.response.data.message)
+            })
         },
 
         create() {
