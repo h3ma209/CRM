@@ -173,7 +173,7 @@
                                     <div class="col-sm-6">
                                         <div class="form-group">
                                             <label for=""><strong>Name:</strong></label>
-                                            <span>{{getCustomerById }}</span>
+                                            <span>{{getCustomerById.name }}</span>
                                         </div>
                                     </div>
                                     <div class="col-sm-3">
@@ -220,7 +220,7 @@
                                                         <span type="number">{{detail.price}}</span>
                                                     </div>
                                                 </td>
-                                                <td>{{ detail.quantity * detail.price }}</td>
+                                                <td>{{ Number(detail.quantity * detail.price).toLocaleString() }}</td>
                                                 <td>
                                                     <div class="form-group">
                                                         <p>{{detail.note}}</p>
@@ -502,7 +502,10 @@ export default {
             if (this.receipt.customer_id != '') {
                 return this.customers.find(item => item.id === this.receipt.customer_id)
 
+            }else{
+                return {name:''}
             }
+
         },
     }
 }
