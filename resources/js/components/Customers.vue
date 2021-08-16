@@ -11,6 +11,7 @@
                     <div class="input-group-prepend">
                         <button class="btn btn-icon btn-primary" @click="getCustomers"><i class="fa fa-search"></i></button>
                     </div>
+                    <input type="text" class="form-control" v-model="search_by_name" placeholder="Customer Name">
                     <input type="date" class="form-control" v-model="filter_start_date">
                     <input type="date" class="form-control" v-model="filter_end_date">
                 </div>
@@ -379,8 +380,11 @@ export default {
                 note: ''
             },
 
+            // search
             filter_start_date: moment(new Date).format('YYYY-MM-DD'),
             filter_end_date: moment(new Date).format('YYYY-MM-DD'),
+            search_by_name:'',
+            
         };
     },
     methods: {
@@ -560,6 +564,7 @@ export default {
                 params: {
                     start_date: this.filter_start_date,
                     end_date: this.filter_end_date,
+                    search_by_name:this.search_by_name
                 }
             }).then(r => this.customers = r.data).catch(e => {
                 toastr.error(e.response.data.message)

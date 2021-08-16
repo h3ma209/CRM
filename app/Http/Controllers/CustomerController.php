@@ -20,11 +20,15 @@ class CustomerController extends Controller
     {
         $start_date = $request->start_date;
         $end_date = $request->end_date ?? $start_date;
+        $search_by_name = $request->search_by_name;
 
         $customers = Customer::where('guest', '0')->when($start_date, function ($q) use ($start_date, $end_date) {
             $q->whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date]);
         })->latest();
-
+        $customers = $customers->when($search_by_name, function($q) use ($search_by_name){
+            $q->where('name', 'LIKE', '%'. $search_by_name .'%');
+        })->latest();
+        
         return $customers->paginate(20);
     }
 
