@@ -79,7 +79,12 @@ class CustomerController extends Controller
 
     public function contracts(Request $request, $customer)
     {
-        return Contract::where('customer_id', $customer)->with('customer')->latest()->paginate(20);
+        $contracts =  Contract::where('customer_id', $customer)->with('customer');
+        if($contracts->get()->isEmpty()){
+            return response(["message"=>"Customer Doesnt have contract"],422);
+        }
+        
+        return $contracts->latest()->paginate(20);
     }
     public function receipts(Request $request, $customer)
     {
@@ -89,11 +94,7 @@ class CustomerController extends Controller
     public function newMonthlyReceipt(Request $request, $customer)
     {
 
-        $contract = Contract::where('customer_id', $customer)->latest()->first();
-
-        if (!$contract) {
-            return response(['message' => 'Customer does not have contract.'], 422);
-        }
+        
 
         $invoiceid = LastInvoiceNumber::firstOrCreate(
             [

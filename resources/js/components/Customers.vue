@@ -547,6 +547,8 @@ export default {
 
             }).catch(e => {
                 toastr.error(e.response.data.message)
+                $('#receiptModal').modal("hide");
+                
             });
 
         },

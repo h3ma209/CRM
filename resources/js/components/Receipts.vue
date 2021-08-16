@@ -32,6 +32,7 @@
                                 <button class="btn btn-success" @click="show(receipt.id)">Show</button>
                                 <button class="btn btn-warning" @click="print(receipt.id)">Print</button>
                                 <button class="btn btn-danger" @click="deleteReceipt(receipt.id)">Delete</button>
+
                             </td>
                         </tr>
                     </tbody>
@@ -407,7 +408,7 @@ export default {
                 $('#receiptModal').modal('hide');
                 this.getReceiptNum();
                 toastr.success('Successfuly Edited Receipt');
-            }).catch(e =>{
+            }).catch(e => {
                 toastr.error(e.response.data.message)
             })
 
@@ -416,21 +417,23 @@ export default {
 
 
         getReceipts() {
-            axios.get('/api/receipt').then(r => this.receipts = r.data).catch(e =>{
+            axios.get('/api/receipt').then(r => this.receipts = r.data).catch(e => {
                 toastr.error(e.response.data.message)
             });
         },
         deleteReceipt(id) {
-            axios.delete('/api/receipt/' + id).then(r => {
-                toastr.success(`Receipt ${id} successfull deleted`)
-                this.getReceipts()
+            if (confirm("Are you sure you want to delete this receipt ?")) {
+                axios.delete('/api/receipt/' + id).then(r => {
+                    toastr.success(`Receipt ${id} successfull deleted`)
+                    this.getReceipts()
 
-            }).catch(e => {
-                toastr.error(e.message)
-            })
+                }).catch(e => {
+                    toastr.error(e.message)
+                })
+            }
         },
         getCustomers() {
-            axios.get('/api/customer-list').then(r => this.customers = r.data).catch(e =>{
+            axios.get('/api/customer-list').then(r => this.customers = r.data).catch(e => {
                 toastr.error(e.response.data.message)
             })
         },
@@ -464,7 +467,7 @@ export default {
                 this.getReceipts()
                 $('#receiptModal').modal('hide')
                 toastr.success('Successfuly Created Receipt')
-            }).catch(e =>{
+            }).catch(e => {
                 toastr.error(e.response.data.message)
             })
             this.getReceiptNum()
@@ -475,7 +478,7 @@ export default {
             this.reset()
         },
         getReceiptNum() {
-            axios.get("/api/receipt/new-invoice-no").then(r => this.last_receipt_num = r.data).catch(e =>{
+            axios.get("/api/receipt/new-invoice-no").then(r => this.last_receipt_num = r.data).catch(e => {
                 toastr.error(e.response.data.message)
             })
         }
