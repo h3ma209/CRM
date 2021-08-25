@@ -74,7 +74,8 @@ class CustomerController extends Controller
 
     public function destroy($id)
     {
-        return Customer::find($id)->delete();
+        return 
+        Customer::find($id)->delete();
     }
 
     public function contracts(Request $request, $customer)

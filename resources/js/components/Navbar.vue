@@ -9,6 +9,9 @@
     <li class="nav-item active">
       <router-link to="/customers" class="nav-link">Customers</router-link>
     </li>
+    <li class="nav-item active">
+      <router-link to="/reports" class="nav-link">reports</router-link>
+    </li>
   </ul>
 </template>
 

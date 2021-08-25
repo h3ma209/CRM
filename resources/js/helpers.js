@@ -28,14 +28,14 @@ export default {
             newWindow.document.write(`</html>`);
 
             newWindow.document.close()
-            setTimeout(function () {
-                newWindow.focus()
-                newWindow.print()
-            }, 1000);
+            // setTimeout(function () {
+            //     newWindow.focus()
+            //     newWindow.print()
+            // }, 1000);
 
-            newWindow.onafterprint = function () {
-                newWindow.close()
-            }
+            // newWindow.onafterprint = function () {
+            //     newWindow.close()
+            // }
         },
 
         freezeReactivity(object) {

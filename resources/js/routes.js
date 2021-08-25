@@ -9,22 +9,23 @@ export default [
     },
     {
         path: '/customers',
-        component: require('./components/Customers').default
+        component: require('./components/Customer/Index').default
     },
     {
         path: '/',
-        component: require('./components/Customers').default
+        component: require('./components/Customer/Index').default
     },
     {
         path: '/customer/:id/contracts',
-        component: require('./components/CustomerContracts').default
+        component: require('./components/Customer/Contracts').default
     },
     {
         path: '/customer/:id/receipts',
-        component: require('./components/CustomerReceipts').default
+        component: require('./components/Customer/Receipts').default
     },
+    
     {
-        path: '/test',
-        component: require('./components/test').default
+        path: '/reports',
+        component: require('./components/Reports/Index').default
     },
 ]

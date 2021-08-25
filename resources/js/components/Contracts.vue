@@ -1,6 +1,6 @@
 <template>
     <div>
-        <button class="btn btn-primary mb-2" data-toggle="modal" data-target="#contractModal">Add Contract +</button>
+        <button class="btn btn-primary mb-2" data-toggle="modal" data-target="#contractModal" @click="reset">Add Contract +</button>
 
         <table class="table table-bordered table-striped">
             <thead>
