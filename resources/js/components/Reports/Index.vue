@@ -16,7 +16,7 @@
         </div>
         <div class="row mt-5">
             <div class="col-3 chart text-center ">
-                <h2 class="mb-3 mt-3">Monthly Income</h2>
+                <h2 class="mb-3 mt-3">Monthly Income</h2>                
                 <monthly-income :data="profit"></monthly-income>
             </div>
             <div class="col-3 chart text-center ">
