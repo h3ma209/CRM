@@ -10,12 +10,13 @@ window.Vue = require('vue').default;
 
 import Vue from 'vue';
 import VueRouter from 'vue-router'
+import store from "./store/Index"
 Vue.use(VueRouter)
 
 import routes from "./routes";
 const router = new VueRouter({
     mode: 'history',
-    routes
+    routes,
 })
 
 import moment from "moment"
@@ -68,6 +69,7 @@ Vue.mixin(helpers)
 const app = new Vue({
     el: '#app',
     router,
+    store,
     methods: {
         formattedDate(arg) {
             return moment(arg).format('YYYY-MM-DD LTS')

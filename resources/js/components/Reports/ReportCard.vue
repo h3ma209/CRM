@@ -6,7 +6,7 @@
         </div>
         <div class="top">
 
-            <h1>{{numbers}}</h1>
+            <h1>{{Number(numbers).toLocaleString()}}</h1>
         </div>
         <div class="middle"></div>
         <div class="bottom"><span>{{title}}</span></div>

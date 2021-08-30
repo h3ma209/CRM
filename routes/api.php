@@ -13,7 +13,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('customer-list', [CustomerController::class, 'list']);
     Route::get('customer/{customer}/contracts', [CustomerController::class, 'contracts']);
     Route::get('customer/{customer}/receipts', [CustomerController::class, 'receipts']);
-    Route::post('customer/{customer}/new-monthly-receipt', [CustomerController::class, 'newMonthlyReceipt']);
     Route::apiResource('customer', CustomerController::class);
 
     Route::get('receipt/new-invoice-no', [ReceiptController::class, 'newInvoiceNumber']);
@@ -23,4 +22,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::apiResource('contract', ContractController::class);
     Route::apiResource('contract/credential', CustomerCredentialsController::class);
+
+
+    // Monthly stuff
+
+    Route::post('customer/{customer}/new-monthly-receipt', [CustomerController::class, 'newMonthlyReceipt']);
+    Route::get('reports/monthly-profit', [ReceiptController::class, 'monthlyProfit']);
 });

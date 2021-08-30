@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use App\Models\ReceiptDetail;
 use App\Models\LastInvoiceNumber;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Carbon;
 
 class ReceiptController extends Controller
 {
@@ -50,7 +51,7 @@ class ReceiptController extends Controller
             ]);
 
             $customer = Customer::create($validated_customer);
-            $request->merge(['customer_id'=> $customer->id]);
+            $request->merge(['customer_id' => $customer->id]);
         }
 
         $validated_receipt = $request->validate([
@@ -124,5 +125,20 @@ class ReceiptController extends Controller
         );
 
         return $lastInvoiceNo->last_invoice_no + 1;
+    }
+
+    public function monthlyProfit()
+    {
+        $start_date = Carbon::now()->subDays(30)->startOfDay();
+        $end_date = Carbon::now();
+        $receipts = Receipt::with('details')->whereBetween('created_at', [$start_date, $end_date])->get();
+        
+        $total_income = $receipts->sum(function ($receipt) {
+            return $receipt->details->sum(function ($detail) {
+                return ($detail->quantity * $detail->price);
+            });
+        });
+        
+        return $total_income;
     }
 }
